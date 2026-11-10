@@ -85,6 +85,29 @@ freeText:SetPoint("BOTTOMLEFT", PAD, 10)
 local moneyText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 moneyText:SetPoint("BOTTOMRIGHT", -PAD, 10)
 
+-- Wenig Platz in den Taschen: "Frei" wird gelb, bei fast vollen Taschen rot.
+local FREE_WARNINGS = {
+    { maxFree = 2, color = { 1, 0.25, 0.25 } },
+    { maxFree = 5, color = { 1, 0.82, 0 } },
+}
+local NORMAL_COLOR = { 1, 1, 1 }
+local shownWarning -- nil = normale Farbe; die Schrift wird nur bei einem Wechsel umgefaerbt
+
+local function UpdateFreeWarning(free)
+    local warning
+    for _, w in ipairs(FREE_WARNINGS) do
+        if free <= w.maxFree then
+            warning = w
+            break
+        end
+    end
+    if warning ~= shownWarning then
+        shownWarning = warning
+        local c = warning and warning.color or NORMAL_COLOR
+        freeText:SetTextColor(c[1], c[2], c[3])
+    end
+end
+
 function Cubby.UpdateFooter()
     local free, total = 0, 0
     for _, bag in ipairs(Cubby.MainBags()) do
@@ -92,6 +115,7 @@ function Cubby.UpdateFooter()
         total = total + Cubby.NumSlots(bag)
     end
     freeText:SetFormattedText(L.FREE_SLOTS, free, total)
+    UpdateFreeWarning(free)
     moneyText:SetText(GetMoneyString(GetMoney(), true))
 end
 
