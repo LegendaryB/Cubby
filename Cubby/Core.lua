@@ -15,7 +15,6 @@ Cubby.DEFAULTS = {
     showKeyring = true,
     combineFreeSlots = true,
     showValue = true,
-    markUpgrades = true,
     locked = false,
 }
 
