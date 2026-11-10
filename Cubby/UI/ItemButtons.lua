@@ -62,11 +62,6 @@ local function CreateItemButton(bag, slot)
     bind:SetTextColor(0.4, 0.8, 1)
     button.cubbyBind = bind
 
-    local letter = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
-    letter:SetPoint("TOPLEFT", 3, -3)
-    letter:Hide()
-    button.cubbyTagLetter = letter
-
     local upgrade = button:CreateTexture(nil, "OVERLAY", nil, 6)
     upgrade:SetSize(14, 14)
     upgrade:SetPoint("BOTTOMRIGHT", -1, 1)
@@ -118,6 +113,7 @@ end
 ---------------------------------------------------------------------------
 -- Anzeige
 ---------------------------------------------------------------------------
+-- Rahmen in Gruppenfarbe
 local function UpdateTagDisplay(button, tag)
     for _, edge in ipairs(button.cubbyTagEdges) do
         if tag then
@@ -125,12 +121,6 @@ local function UpdateTagDisplay(button, tag)
         end
         edge:SetShown(tag ~= nil)
     end
-    if tag then
-        -- erster Buchstabe des Gruppennamens (UTF-8-sicher)
-        button.cubbyTagLetter:SetText(tag.name:match("^[%z\1-\127\194-\244][\128-\191]*"))
-        button.cubbyTagLetter:SetTextColor(tag.r, tag.g, tag.b)
-    end
-    button.cubbyTagLetter:SetShown(tag ~= nil)
 end
 
 local function IsGear(classID, equipLoc)
