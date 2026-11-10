@@ -84,6 +84,17 @@ local function RequestSync()
     end
 end
 
+-- Is any bag other than bagID open (the keyring counts as a bag)?
+local function AnyOtherBagOpen(bagID)
+    for _, bag in ipairs(Cubby.TaggableBags()) do
+        if bag ~= bagID and IsBagOpen(bag) then
+            return true
+        end
+    end
+    local keyring = Cubby.KEYRING_BAG
+    return keyring ~= nil and keyring ~= bagID and IsBagOpen(keyring) == true
+end
+
 local function InstallHooks()
     for _, name in ipairs({ "OpenAllBags", "CloseAllBags", "ToggleAllBags", "ToggleBackpack",
         "OpenBackpack", "CloseBackpack", "ToggleBag", "OpenBag", "CloseBag" }) do
@@ -95,6 +106,20 @@ local function InstallHooks()
     for _, f in ipairs(GetBlizzardBagFrames()) do
         hooksecurefunc(f, "Show", RequestSync)
         hooksecurefunc(f, "Hide", RequestSync)
+    end
+
+    -- Cubby is one window for all bags, but Blizzard's bag buttons and bag keys toggle a single bag.
+    -- While the window is open, a click on any bag therefore closes the whole window; otherwise it
+    -- would only close that one bag and the window would stay up as long as another bag is open.
+    -- If no other bag is open afterwards there is nothing to do: closing the last bag already closes
+    -- the window, and Blizzard's "open all bags" sequence calls ToggleBag(0) only after it has closed
+    -- everything, so it must not be interrupted there.
+    if ToggleBag then
+        hooksecurefunc("ToggleBag", function(bagID)
+            if not state.failed and frame:IsShown() and AnyOtherBagOpen(bagID) then
+                CloseAllBags()
+            end
+        end)
     end
 
     if MerchantFrame_Update then
