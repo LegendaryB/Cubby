@@ -67,6 +67,13 @@ local function CreateItemButton(bag, slot)
     letter:Hide()
     button.cubbyTagLetter = letter
 
+    local upgrade = button:CreateTexture(nil, "OVERLAY", nil, 6)
+    upgrade:SetSize(14, 14)
+    upgrade:SetPoint("BOTTOMRIGHT", -1, 1)
+    upgrade:SetAtlas("bags-greenarrow")
+    upgrade:Hide()
+    button.cubbyUpgrade = upgrade
+
     -- Anzahl der freien Plaetze, wenn dieser leere Platz sie alle vertritt
     local free = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalLarge")
     free:SetPoint("CENTER")
@@ -166,24 +173,69 @@ local function SetSearchMatch(button, matches)
     end
 end
 
--- Itemlevel und BoE-Text, nur fuer Ausruestung
-local function GearTexts(info, bag, slot)
+---------------------------------------------------------------------------
+-- Upgrades
+---------------------------------------------------------------------------
+-- Ausruestungsplaetze (Nummern seit Classic unveraendert) je Ausruestungstyp
+local RANGED_SLOT -- 18, falls es den Fernkampfplatz gibt; sonst gehoeren Fernkampfwaffen in die Haupthand
+do
+    local ok, slotID = pcall(GetInventorySlotInfo, "RANGEDSLOT")
+    RANGED_SLOT = ok and slotID or 16
+end
+local EQUIP_SLOTS = {
+    INVTYPE_HEAD = { 1 }, INVTYPE_NECK = { 2 }, INVTYPE_SHOULDER = { 3 }, INVTYPE_CHEST = { 5 }, INVTYPE_ROBE = { 5 },
+    INVTYPE_WAIST = { 6 }, INVTYPE_LEGS = { 7 }, INVTYPE_FEET = { 8 }, INVTYPE_WRIST = { 9 }, INVTYPE_HAND = { 10 },
+    INVTYPE_FINGER = { 11, 12 }, INVTYPE_TRINKET = { 13, 14 }, INVTYPE_CLOAK = { 15 },
+    INVTYPE_WEAPON = { 16, 17 }, INVTYPE_2HWEAPON = { 16 }, INVTYPE_WEAPONMAINHAND = { 16 },
+    INVTYPE_WEAPONOFFHAND = { 17 }, INVTYPE_SHIELD = { 17 }, INVTYPE_HOLDABLE = { 17 },
+    INVTYPE_RANGED = { RANGED_SLOT }, INVTYPE_RANGEDRIGHT = { RANGED_SLOT }, INVTYPE_THROWN = { RANGED_SLOT },
+    INVTYPE_RELIC = { RANGED_SLOT },
+}
+
+-- Itemlevel des schwaechsten passenden Ausruestungsplatzes; ein leerer Platz zaehlt 0.
+local function WeakestEquippedLevel(slots)
+    local weakest
+    for _, slot in ipairs(slots) do
+        local location = ItemLocation:CreateFromEquipmentSlot(slot)
+        local level = C_Item.DoesItemExist(location) and C_Item.GetCurrentItemLevel(location) or 0
+        weakest = weakest and math.min(weakest, level) or level
+    end
+    return weakest or 0
+end
+
+-- Besser als das Getragene, und der Charakter kann es schon tragen (Ruestungsart, Waffenart, Stufe)?
+local function IsUpgrade(itemID, equipLoc, itemLevel)
+    local slots = EQUIP_SLOTS[equipLoc]
+    if not (slots and itemLevel) then
+        return false
+    end
+    if C_PlayerInfo and C_PlayerInfo.CanUseItem and not C_PlayerInfo.CanUseItem(itemID) then
+        return false
+    end
+    local minLevel = select(5, C_Item.GetItemInfo(itemID))
+    if minLevel and minLevel > UnitLevel("player") then
+        return false
+    end
+    return itemLevel > WeakestEquippedLevel(slots)
+end
+
+-- Itemlevel, BoE-Text und Upgrade-Markierung, nur fuer Ausruestung
+local function GearInfo(info, bag, slot)
     local _, _, _, equipLoc, _, classID = C_Item.GetItemInfoInstant(info.itemID)
     if not IsGear(classID, equipLoc) then
-        return nil, nil
+        return nil, nil, false
     end
+    local location = ItemLocation:CreateFromBagAndSlot(bag, slot)
+    local itemLevel = C_Item.DoesItemExist(location) and C_Item.GetCurrentItemLevel(location) or nil
     local levelText, bindText
-    if Cubby.db.showItemLevel then
-        local location = ItemLocation:CreateFromBagAndSlot(bag, slot)
-        local itemLevel = C_Item.DoesItemExist(location) and C_Item.GetCurrentItemLevel(location)
-        if itemLevel and itemLevel > 1 then
-            levelText = itemLevel
-        end
+    if Cubby.db.showItemLevel and itemLevel and itemLevel > 1 then
+        levelText = itemLevel
     end
     if Cubby.db.showBoE and not info.isBound then
         bindText = L.BOE
     end
-    return levelText, bindText
+    local upgrade = Cubby.db.markUpgrades and IsUpgrade(info.itemID, equipLoc, itemLevel) or false
+    return levelText, bindText, upgrade
 end
 
 local function UpdateButton(button)
@@ -212,10 +264,11 @@ local function UpdateButton(button)
     UpdateTagDisplay(button, tag)
     UpdateSellProtection(button, tag)
 
-    local levelText, bindText
+    local levelText, bindText, upgrade
     if texture and itemID then
-        levelText, bindText = GearTexts(info, bag, slot)
+        levelText, bindText, upgrade = GearInfo(info, bag, slot)
     end
+    button.cubbyUpgrade:SetShown(upgrade == true)
 
     if levelText then
         button.cubbyLevel:SetText(levelText)
