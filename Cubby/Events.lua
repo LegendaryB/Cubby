@@ -1,4 +1,4 @@
--- Einstellungen laden und auf Spiel-Events reagieren. Wird als letzte Datei geladen.
+-- Load settings and react to game events. Loaded as the last file.
 local _, Cubby = ...
 local state = Cubby.state
 local frame = Cubby.frame
@@ -18,7 +18,7 @@ local function LoadSettings()
     db.nextTagID = db.nextTagID or 1
     db.itemTags = db.itemTags or {}
     db.rules = db.rules or {}
-    for _, tag in ipairs(Cubby.SortedTags()) do -- aeltere Gruppen behalten ihre bisherige (alphabetische) Reihenfolge
+    for _, tag in ipairs(Cubby.SortedTags()) do -- older groups keep their previous (alphabetical) order
         tag.order = tag.order or Cubby.NextTagOrder()
     end
 end
@@ -35,7 +35,7 @@ local function OnMerchantChanged(event)
     Cubby.DropProtectedCursorItem()
     Cubby.UpdateBlizzardJunkButton()
     if frame:IsShown() then
-        SafeRefresh() -- setzt auch den Verkaufsschutz auf den Buttons
+        SafeRefresh() -- also sets the sell protection on the buttons
     end
 end
 
@@ -63,8 +63,8 @@ function events.BAG_CONTAINER_UPDATE()
     ScheduleRefresh()
 end
 
--- Items haben sich bewegt. Neu anordnen muss nur, wer Bereiche hat oder freie Plaetze buendelt:
--- sonst steht jeder Platz fest an seiner Stelle.
+-- Items moved. Only whoever has sections or combines free slots needs to re-arrange:
+-- otherwise every slot stays fixed in its place.
 function events.BAG_UPDATE_DELAYED()
     state.softLayout = state.softLayout or Cubby.HasSectionTags() or Cubby.db.combineFreeSlots
     ScheduleRefresh()
@@ -80,7 +80,7 @@ events.MERCHANT_SHOW = OnMerchantChanged
 events.MERCHANT_CLOSED = OnMerchantChanged
 
 function events.CURSOR_CHANGED()
-    -- Das Event feuert mitten im Aufnehmen; erst im naechsten Frame eingreifen.
+    -- The event fires in the middle of picking up; only step in on the next frame.
     if state.merchantOpen or frame:IsShown() then
         C_Timer.After(0, OnCursorChanged)
     end
@@ -101,22 +101,22 @@ function events.BAG_UPDATE_COOLDOWN()
     end
 end
 
--- Questitems und neue Items aendern nur die Anzeige der Buttons.
+-- Quest items and new items only change how the buttons look.
 local function RefreshSoon()
     ScheduleRefresh()
 end
 events.QUEST_ACCEPTED = RefreshSoon
 events.QUEST_REMOVED = RefreshSoon
 events.BAG_NEW_ITEMS_UPDATED = RefreshSoon
-events.GET_ITEM_INFO_RECEIVED = RefreshSoon -- Itemdaten fuer den Haendlerwert sind nachgeladen
+events.GET_ITEM_INFO_RECEIVED = RefreshSoon -- item data for the vendor value has been loaded
 
 frame:SetScript("OnEvent", function(_, event, ...)
     if not Cubby.db and event ~= "PLAYER_LOGIN" then
-        return -- vor dem Einloggen gibt es noch keine Einstellungen
+        return -- there are no settings before login
     end
     events[event](event, ...)
 end)
 
 for event in pairs(events) do
-    pcall(frame.RegisterEvent, frame, event) -- unbekannte Events still ignorieren
+    pcall(frame.RegisterEvent, frame, event) -- ignore unknown events silently
 end

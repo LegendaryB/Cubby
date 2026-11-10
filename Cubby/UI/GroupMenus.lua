@@ -1,4 +1,4 @@
--- Menues und Dialoge rund um Gruppen: Gruppen-Button, Kopfzeilen-Menue und Alt+Linksklick auf ein Item.
+-- Menus and dialogs around groups: groups button, header menu and Alt+left-click on an item.
 local _, Cubby = ...
 local TagLabel, SortedTags, TagsChanged = Cubby.TagLabel, Cubby.SortedTags, Cubby.TagsChanged
 local L = Cubby.L
@@ -21,9 +21,9 @@ local function PickTagColor(tag)
 end
 
 ---------------------------------------------------------------------------
--- Dialoge
+-- Dialogs
 ---------------------------------------------------------------------------
--- data.tag: diese Gruppe umbenennen. Sonst neue Gruppe anlegen, mit data.itemID gleich fuer dieses Item.
+-- data.tag: rename this group. Otherwise create a new group, with data.itemID right for this item.
 local function ApplyTagName(data, text)
     local name = (text or ""):gsub("|", "")
     name = strtrim(name)
@@ -91,12 +91,12 @@ StaticPopupDialogs.CUBBY_SELL_SECTION = {
     whileDead = 1,
 }
 
--- itemID ist optional: die neue Gruppe bekommt dieses Item gleich zugewiesen.
+-- itemID is optional: the new group is assigned this item right away.
 local function AskNewGroupName(itemID)
     StaticPopup_Show("CUBBY_TAG_NAME", L.NEW_GROUP_PROMPT, nil, { itemID = itemID })
 end
 
--- Verkaufen-Button in der Kopfzeile: erst nachfragen, mit Anzahl und Wert
+-- Sell button in the header: ask first, with count and value
 local function AskSellSection(tag)
     local slots, count, value = Cubby.SellableSlots(tag)
     if #slots == 0 then
@@ -107,9 +107,9 @@ local function AskSellSection(tag)
 end
 
 ---------------------------------------------------------------------------
--- Menues
+-- Menus
 ---------------------------------------------------------------------------
--- Untermenue "Automatisch einsortieren": eine Checkbox pro Item-Kategorie
+-- One checkbox for a rule entry (a quality or an item category); shows which group already owns it
 local function AddRuleCheckbox(description, tag, entry)
     local category, label = entry.category, entry.label
     local owner = Cubby.RuleTag(category)
@@ -124,7 +124,7 @@ local function AddRuleCheckbox(description, tag, entry)
     end)
 end
 
--- Untermenue "Automatisch einsortieren": oben die Qualitaetsstufen, darunter die Item-Kategorien
+-- Submenu "Sort automatically": quality levels on top, item categories below
 local function AddRuleEntries(description, tag)
     for _, entry in ipairs(Cubby.QualityRules()) do
         AddRuleCheckbox(description, tag, entry)
@@ -139,7 +139,7 @@ local function AddRuleEntries(description, tag)
     end
 end
 
--- Einstellungen einer Gruppe; dieselben Eintraege im Gruppen-Button und im Kopfzeilen-Menue
+-- Settings of a group; the same entries in the groups button and in the header menu
 local function AddTagEditEntries(description, tag)
     description:CreateCheckbox(L.SELL_PROTECTION, function()
         return tag.noSell
@@ -163,7 +163,7 @@ local function AddTagEditEntries(description, tag)
     end)
 end
 
--- Klick auf die Kopfzeile eines Bereichs
+-- Click on a section header
 local function OpenGroupMenu(owner, tag)
     MenuUtil.CreateContextMenu(owner, function(_, root)
         root:CreateTitle(tag.name)
@@ -171,7 +171,7 @@ local function OpenGroupMenu(owner, tag)
     end)
 end
 
--- Gruppen-Button: neue Gruppe anlegen und alle Gruppen bearbeiten, auch solche ohne Bereich
+-- Groups button: create a new group and edit all groups, including those without a section
 local function OpenGroupsMenu(owner)
     MenuUtil.CreateContextMenu(owner, function(_, root)
         root:CreateButton(L.NEW_GROUP, function()
@@ -184,7 +184,7 @@ local function OpenGroupsMenu(owner)
     end)
 end
 
--- Alt+Linksklick auf ein Item: Gruppe zuweisen
+-- Alt+left-click on an item: assign a group
 local function OpenItemMenu(owner, itemID)
     MenuUtil.CreateContextMenu(owner, function(_, root)
         root:CreateTitle(C_Item.GetItemInfo(itemID) or L.CHOOSE_GROUP)

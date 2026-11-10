@@ -1,5 +1,5 @@
--- Kopfzeile ueber jedem Gruppenbereich: Klick auf den Namen oeffnet das Gruppenmenue,
--- daneben Einklappen, Verschieben, Verkaufsschutz und Farbe.
+-- Header above every group section: clicking the name opens the group menu,
+-- next to it collapse, move, sell protection and color.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -8,7 +8,7 @@ local IsCollapsed, TagLabel, TagForItem = Cubby.IsCollapsed, Cubby.TagLabel, Cub
 
 local groupHeaders = {}
 
--- Die kleinen Buttons sitzen direkt in der Kopfzeile; diese kennt ihre Gruppe.
+-- The small buttons sit directly in the header; the header knows its group.
 local function HeaderTag(button)
     return button:GetParent().tag
 end
@@ -49,7 +49,7 @@ local function CreateGroupHeader()
     Cubby.SetButtonIconFile(protect, "Interface\\LFGFrame\\UI-LFG-ICON-LOCK")
     protect:SetScript("OnClick", function(self)
         Cubby.ToggleSellProtection(HeaderTag(self))
-        Cubby.ShowIconTooltip(self) -- zeigt gleich den neuen Zustand
+        Cubby.ShowIconTooltip(self) -- immediately shows the new state
     end)
     header.protect = protect
 
@@ -69,7 +69,7 @@ local function CreateGroupHeader()
     end)
     header.moveUp = moveUp
 
-    -- Nur beim Haendler sichtbar: alles im Bereich verkaufen (siehe UpdateGroupCounts)
+    -- Only visible at the vendor: sell everything in the section (see UpdateGroupCounts)
     local sell = CreateIconButton(header, 16, L.SELL_SECTION)
     sell:SetPoint("RIGHT", moveUp, "LEFT", -4, 0)
     SetButtonIcon(sell, "bags-junkcoin", "$")
@@ -88,7 +88,7 @@ local function CreateGroupHeader()
     return header
 end
 
--- Kopfzeile Nummer index fuer einen Bereich zeigen; die Beschriftung setzt UpdateGroupCounts.
+-- Show header number index for a section; UpdateGroupCounts sets the label.
 local function ShowGroupHeader(index, section, top, width)
     local header = groupHeaders[index]
     if not header then
@@ -123,7 +123,7 @@ local function HideGroupHeaders()
     end
 end
 
--- Der oberste Bereich kann nicht hoeher, der unterste nicht tiefer.
+-- The top section cannot move higher, the bottom one not lower.
 local function UpdateMoveButtons(count)
     for i = 1, count do
         SetButtonEnabled(groupHeaders[i].moveUp, i > 1)
@@ -145,7 +145,7 @@ local function AddBagCounts(bag, counts, values, hasNew)
     end
 end
 
--- Eigener Durchlauf statt Zaehlen im Layout: beim Haendler ruht das Layout, die Zahl soll aber stimmen.
+-- Separate pass instead of counting in the layout: at the vendor the layout rests, but the count must stay right.
 local function UpdateGroupCounts()
     local counts, values, hasNew = {}, {}, {}
     for _, bag in ipairs(Cubby.TaggableBags()) do
@@ -154,7 +154,7 @@ local function UpdateGroupCounts()
     for _, header in ipairs(groupHeaders) do
         if header:IsShown() then
             local tag = header.tag
-            -- Offene Bereiche brauchen das nicht: dort leuchtet das Item selbst.
+            -- Open sections do not need this: the item itself glows there.
             local newMark = (hasNew[tag.id] and IsCollapsed(tag)) and (" |cff66dd66%s|r"):format(L.NEW_ITEMS) or ""
             local value = values[tag.id] or 0
             local valueText = (Cubby.db.showValue and value > 0) and ("  " .. GetMoneyString(value, true)) or ""

@@ -1,12 +1,12 @@
--- Sortieren-Button: Blizzard sortiert, Cubby ordnet dabei laufend neu an.
--- Blizzards Sortieren verschiebt die Items ueber mehrere Sekunden. Hier ist das Umordnen ausdruecklich
--- gewollt, auch unter der Maus und beim Haendler: sonst bleiben Items sichtbar im falschen Bereich stehen.
+-- Sort button: Blizzard sorts, Cubby keeps re-arranging while it does.
+-- Blizzard's sorting moves items over several seconds. Re-arranging is explicitly wanted here,
+-- even under the mouse and at the vendor: otherwise items visibly stay in the wrong section.
 local _, Cubby = ...
 
-local WATCH_STEP, WATCH_QUIET, WATCH_MAX = 0.2, 3, 30 -- Sekunden
+local WATCH_STEP, WATCH_QUIET, WATCH_MAX = 0.2, 3, 30 -- seconds
 local watchRun = 0
 
--- Inhalt aller Taschen als Text, um Aenderungen zu erkennen
+-- Contents of all bags as text, to detect changes
 local function BagContents()
     local ids = {}
     for _, bag in ipairs(Cubby.TaggableBags()) do
@@ -17,7 +17,7 @@ local function BagContents()
     return table.concat(ids, ",")
 end
 
--- Beobachtet die Taschen, bis sich WATCH_QUIET Sekunden lang nichts mehr bewegt hat.
+-- Watches the bags until nothing has moved for WATCH_QUIET seconds.
 local function WatchSorting()
     watchRun = watchRun + 1
     local run = watchRun
@@ -26,7 +26,7 @@ local function WatchSorting()
 
     local function Step()
         if run ~= watchRun then
-            return -- ein neuer Sortiervorgang hat uebernommen
+            return -- a new sort run has taken over
         end
         elapsed = elapsed + WATCH_STEP
         local current = BagContents()

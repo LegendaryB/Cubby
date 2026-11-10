@@ -1,5 +1,5 @@
--- Item-Buttons: Blizzards eigene Vorlage plus Cubbys Markierungen (Itemlevel, BoE, Gruppenrahmen).
--- Benutzen, Ziehen, Verkaufen und Tooltips laufen ueber Blizzards Code.
+-- Item buttons: Blizzard's own template plus Cubby's markers (item level, BoE, group border).
+-- Using, dragging, selling and tooltips run through Blizzard's code.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -7,20 +7,20 @@ local TagForItem = Cubby.TagForItem
 local UpdateSellProtection = Cubby.UpdateSellProtection
 
 local buttons = {} -- buttons[bag][slot]
-local holders = {} -- ein Elternframe pro Tasche; seine ID ist die Taschen-ID
+local holders = {} -- one parent frame per bag; its ID is the bag ID
 
 local function GetHolder(bag)
     local holder = holders[bag]
     if not holder then
         holder = CreateFrame("Frame", nil, Cubby.content)
-        holder:SetID(bag) -- Blizzards Item-Button liest die Taschen-ID vom Elternframe
+        holder:SetID(bag) -- Blizzard's item button reads the bag ID from its parent frame
         holder:SetAllPoints(Cubby.content)
         holders[bag] = holder
     end
     return holder
 end
 
--- Alt+Linksklick: Linksklick nimmt ein Item schlimmstenfalls auf, verkauft oder benutzt es aber nie.
+-- Alt+left-click: at worst a left-click picks an item up, but it never sells or uses it.
 local function OnItemClick(button, mouseButton)
     if mouseButton ~= "LeftButton" or not IsAltKeyDown() then
         return
@@ -38,7 +38,7 @@ local function OnItemClick(button, mouseButton)
     end
 end
 
--- Farbiger Rahmen in Gruppenfarbe: oben, unten, links, rechts
+-- Colored border in group color: top, bottom, left, right
 local TAG_EDGES = {
     { "TOPLEFT", "TOPRIGHT" }, { "BOTTOMLEFT", "BOTTOMRIGHT" },
     { "TOPLEFT", "BOTTOMLEFT" }, { "TOPRIGHT", "BOTTOMRIGHT" },
@@ -63,7 +63,7 @@ local function CreateItemButton(bag, slot)
     button.cubbyBind = bind
 
 
-    -- Anzahl der freien Plaetze, wenn dieser leere Platz sie alle vertritt
+    -- Number of free slots, if this empty slot stands for all of them
     local free = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalLarge")
     free:SetPoint("CENTER")
     free:Hide()
@@ -99,15 +99,15 @@ local function GetButton(bag, slot)
     return button
 end
 
--- Vorhandenen Button finden, ohne einen neuen anzulegen
+-- Find an existing button without creating a new one
 local function FindButton(bag, slot)
     return slot and buttons[bag] and buttons[bag][slot] or nil
 end
 
 ---------------------------------------------------------------------------
--- Anzeige
+-- Display
 ---------------------------------------------------------------------------
--- Rahmen in Gruppenfarbe
+-- Border in group color
 local function UpdateTagDisplay(button, tag)
     for _, edge in ipairs(button.cubbyTagEdges) do
         if tag then
@@ -135,7 +135,7 @@ local function QualityColor(quality)
     return 1, 1, 1
 end
 
--- Gesucht wird im Itemnamen und im Gruppennamen.
+-- Search matches the item name and the group name.
 local function MatchesSearch(link, itemID)
     local searchText = state.searchText
     if searchText == "" then
@@ -157,7 +157,7 @@ local function SetSearchMatch(button, matches)
     end
 end
 
--- Itemlevel und BoE-Text, nur fuer Ausruestung
+-- Item level and BoE text, only for gear
 local function GearTexts(info, bag, slot)
     local _, _, _, equipLoc, _, classID = C_Item.GetItemInfoInstant(info.itemID)
     if not IsGear(classID, equipLoc) then
@@ -191,13 +191,13 @@ local function UpdateButton(button)
     SetItemButtonDesaturated(button, info and info.isLocked)
     SetItemButtonQuality(button, quality, link, false, info and info.isBound)
     button:SetReadable(info and info.isReadable)
-    button:UpdateCooldown(texture) -- setzt auch "hat Item"
+    button:UpdateCooldown(texture) -- also sets "has item"
 
     local questInfo = texture and C_Container.GetContainerItemQuestInfo(bag, slot)
     button:UpdateQuestItem(questInfo and questInfo.isQuestItem, questInfo and questInfo.questID, questInfo and questInfo.isActive)
     button:UpdateNewItem(quality)
 
-    -- Schrott-Muenze immer anzeigen (Standard: nur beim Haendler), ausser das Item hat Verkaufsschutz
+    -- Always show the junk coin (default: only at the vendor), unless the item has sell protection
     button.JunkIcon:SetShown(texture ~= nil and quality == Enum.ItemQuality.Poor and not info.hasNoValue
         and not (tag and tag.noSell))
     UpdateTagDisplay(button, tag)
@@ -223,7 +223,7 @@ local function UpdateButton(button)
         button.cubbyBind:Hide()
     end
 
-    -- Liegt inzwischen ein Item auf dem Platz, bis zum naechsten Umordnen keine Zahl zeigen
+    -- If an item has meanwhile landed on the slot, show no number until the next re-arrange
     if button.cubbyFreeCount and not texture then
         button.cubbyFree:SetText(button.cubbyFreeCount)
         button.cubbyFree:Show()
@@ -234,7 +234,7 @@ local function UpdateButton(button)
     SetSearchMatch(button, MatchesSearch(link, itemID))
 end
 
--- Nur die Suchtreffer neu bewerten, ohne die Buttons komplett zu aktualisieren
+-- Only re-evaluate the search matches, without fully updating the buttons
 local function ApplySearch()
     for _, button in ipairs(Cubby.active) do
         local bag, slot = button:GetBagID(), button:GetID()
@@ -242,7 +242,7 @@ local function ApplySearch()
     end
 end
 
--- Gruppe im Item-Tooltip
+-- Group in the item tooltip
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip, data)
     if tooltip ~= GameTooltip or not data or (issecretvalue and issecretvalue(data.id)) then
         return

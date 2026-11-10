@@ -7,14 +7,14 @@
 ## IconTexture: Interface\Icons\INV_Misc_Bag_08
 ## SavedVariables: CubbyDB
 
-# Grundlagen und Logik
+# Core and logic
 Core.lua
 Locales.lua
 UI\Widgets.lua
 Groups.lua
 SellProtection.lua
 
-# Fenster
+# Windows
 UI\Window.lua
 UI\GroupMenus.lua
 UI\ItemButtons.lua
@@ -23,7 +23,7 @@ UI\GroupHeaders.lua
 UI\Layout.lua
 UI\Options.lua
 
-# Anbindung an Blizzard
+# Blizzard integration
 Sorting.lua
 BlizzardBags.lua
 Events.lua

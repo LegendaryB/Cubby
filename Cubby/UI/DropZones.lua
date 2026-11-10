@@ -1,17 +1,17 @@
--- Ablageflaechen: liegen nur waehrend des Ziehens ueber den Bereichen. Ein Item dort abzulegen aendert
--- nur seine Gruppe, es bleibt physisch auf seinem Platz. Die Flaechen muessen die Item-Buttons
--- verdecken, sonst wuerde Blizzards Klickcode die Items stattdessen vertauschen.
+-- Drop zones: they only lie over the sections while dragging. Dropping an item there only changes
+-- its group, it physically stays in its slot. The zones must cover the item buttons,
+-- otherwise Blizzard's click code would swap the items instead.
 local _, Cubby = ...
 local TagForItem = Cubby.TagForItem
 local L = Cubby.L
 
--- Flaeche des ungruppierten Bereichs: wird wie eine Gruppe gezeichnet, entfernt aber die Gruppe.
+-- Zone of the ungrouped section: drawn like a group, but removes the group.
 Cubby.NO_GROUP_ZONE = { name = L.NO_GROUP, r = 0.6, g = 0.6, b = 0.6, clearsGroup = true }
 
 local dropZones = {}
 
 local function PaintDropZone(zone, alpha)
-    if zone.tag then -- kann fehlen, wenn der Bereich gerade unter der Maus verschwunden ist
+    if zone.tag then -- can be missing if the section just vanished under the mouse
         zone.fill:SetColorTexture(zone.tag.r, zone.tag.g, zone.tag.b, alpha)
     end
 end
@@ -60,7 +60,7 @@ local function GetDropZone(index)
     return zone
 end
 
--- Flaeche Nummer index ueber einen Bereich legen (zoneTag: Gruppe oder NO_GROUP_ZONE)
+-- Place zone number index over a section (zoneTag: group or NO_GROUP_ZONE)
 local function PlaceDropZone(index, zoneTag, top, width, height)
     local zone = GetDropZone(index)
     zone.tag = zoneTag
@@ -71,7 +71,7 @@ local function PlaceDropZone(index, zoneTag, top, width, height)
     PaintDropZone(zone, 0.25)
 end
 
--- Flaechen ab dieser Nummer gehoeren zu keinem Bereich mehr.
+-- Zones from this number on belong to no section any more.
 local function ReleaseDropZones(firstUnused)
     for i = firstUnused, #dropZones do
         dropZones[i].tag = nil
@@ -86,7 +86,7 @@ local function CursorHasBagItem()
     return location ~= nil and location:GetBagAndSlot() ~= nil
 end
 
--- Sichtbar nur, solange ein Taschen-Item am Mauszeiger haengt
+-- Visible only while a bag item is on the cursor
 local function UpdateDropZones()
     local show = CursorHasBagItem()
     local _, cursorItemID = GetCursorInfo()
@@ -94,7 +94,7 @@ local function UpdateDropZones()
     local first = Cubby.active[1]
     local level = first and first:GetFrameLevel()
     for _, zone in ipairs(dropZones) do
-        -- Ungruppierte Items sollen sich weiter normal zwischen den Plaetzen verschieben lassen.
+        -- Ungrouped items should still move normally between slots.
         local visible = show and zone.tag ~= nil and (hasGroup or not zone.tag.clearsGroup)
         if visible and level then
             zone:SetFrameLevel(level + 5)

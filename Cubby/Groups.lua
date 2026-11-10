@@ -1,32 +1,32 @@
--- Gruppen: das Datenmodell hinter Bereichen, Verkaufsschutz und automatischer Einsortierung.
--- Intern heisst eine Gruppe "tag", im Spiel steht ueberall "Gruppe".
+-- Groups: the data model behind sections, sell protection and automatic sorting.
+-- Internally a group is called "tag"; the game shows "group" everywhere.
 --
 -- In CubbyDB:
 --   tags[id]         = { id, name, r, g, b, noSell, section, order, collapsed }
---   itemTags[itemID] = Gruppen-ID, oder false fuer "bewusst keine Gruppe" (schlaegt auch Regeln)
---   rules[Kategorie] = { tagID, name }: alle Items dieser Kategorie gehoeren automatisch zur Gruppe.
---                      Kategorie ist eine Zahl (Itemklasse) oder "q0".."q5" (Qualitaet).
+--   itemTags[itemID] = group ID, or false for "deliberately no group" (also beats rules)
+--   rules[category]  = { tagID, name }: all items of this category belong to the group automatically.
+--                      category is a number (item class) or "q0".."q5" (quality).
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
 
--- Qualitaetsstufen fuer Regeln: Schlecht (grau) bis Legendaer
+-- Quality levels for rules: poor (gray) up to legendary
 local QUALITIES = { 0, 1, 2, 3, 4, 5 }
 
 local NEW_TAG_COLORS = {
     { 0.25, 0.65, 1 }, { 0.3, 0.85, 0.4 }, { 1, 0.8, 0.2 }, { 0.8, 0.45, 1 }, { 1, 0.55, 0.2 },
 }
 
--- Nach jeder Aenderung an Gruppen: neu anordnen und Blizzards Schrott-Button pruefen.
+-- After every change to groups: re-arrange and check Blizzard's junk button.
 local function TagsChanged()
     Cubby.RequestLayout()
     Cubby.UpdateBlizzardJunkButton()
 end
 
 ---------------------------------------------------------------------------
--- Abfragen
+-- Queries
 ---------------------------------------------------------------------------
--- Kategorie eines Items als Zahl (Klasse * 1000 + Unterklasse) plus lesbarer Name
+-- Category of an item as a number (class * 1000 + subclass) plus a readable name
 local function ItemCategory(itemID)
     local _, itemType, itemSubType, _, _, classID, subClassID = C_Item.GetItemInfoInstant(itemID)
     if not classID then
@@ -39,7 +39,7 @@ local function ItemCategory(itemID)
     return classID * 1000 + (subClassID or 0), label
 end
 
--- Gruppe, der eine Regel die Kategorie zuordnet
+-- Group that a rule assigns the category to
 local function RuleTag(category)
     local rule = Cubby.db.rules[category]
     return rule and Cubby.db.tags[rule.tagID] or nil
@@ -49,7 +49,7 @@ local function QualityKey(quality)
     return "q" .. quality
 end
 
--- Eine Kategorie-Regel ist genauer als eine Qualitaets-Regel und gewinnt deshalb.
+-- A category rule is more specific than a quality rule and therefore wins.
 local function RuleTagForItem(itemID)
     local category = ItemCategory(itemID)
     local tag = category and RuleTag(category)
@@ -60,7 +60,7 @@ local function RuleTagForItem(itemID)
     return quality and RuleTag(QualityKey(quality)) or nil
 end
 
--- Die Zuweisung von Hand hat immer Vorrang vor einer Regel.
+-- A manual assignment always takes precedence over a rule.
 local function TagForItem(itemID)
     local db = Cubby.db
     if not db or not itemID then
@@ -75,7 +75,7 @@ local function TagForItem(itemID)
     return RuleTagForItem(itemID)
 end
 
--- Stammt die Gruppe nur aus einer Regel, also ohne Zuweisung von Hand?
+-- Does the group come only from a rule, i.e. without a manual assignment?
 local function IsAutoTagged(itemID)
     return Cubby.db.itemTags[itemID] == nil
 end
@@ -85,7 +85,7 @@ local function IsSellProtected(itemID)
     return tag ~= nil and tag.noSell == true
 end
 
--- Gruppenname in der Gruppenfarbe
+-- Group name in the group color
 local function TagLabel(tag)
     return ("|cff%02x%02x%02x%s|r"):format(
         math.floor(tag.r * 255 + 0.5), math.floor(tag.g * 255 + 0.5), math.floor(tag.b * 255 + 0.5), tag.name)
@@ -102,7 +102,7 @@ local function SortedTags()
     return list
 end
 
--- Gruppen mit eigenem Bereich, in der vom Spieler festgelegten Reihenfolge
+-- Groups with their own section, in the order set by the player
 local function AreaTagsInOrder()
     local list = {}
     for _, tag in pairs(Cubby.db.tags) do
@@ -133,12 +133,12 @@ local function HasSectionTags()
     return false
 end
 
--- Beim Suchen sind alle Bereiche offen, sonst blieben Treffer in eingeklappten Bereichen unsichtbar.
+-- While searching all sections are open, otherwise matches in collapsed sections would stay invisible.
 local function IsCollapsed(tag)
     return tag.collapsed == true and state.searchText == ""
 end
 
--- Zur Auswahl fuer Regeln stehen die Kategorien, die gerade in den Taschen liegen, plus alle schon vergebenen.
+-- Rule choices are the categories currently in the bags plus all that are already assigned.
 local function RuleCategories()
     local seen, list = {}, {}
     local function Add(category, label)
@@ -148,7 +148,7 @@ local function RuleCategories()
         end
     end
     for category, rule in pairs(Cubby.db.rules) do
-        if type(category) == "number" then -- Qualitaets-Regeln stehen in QualityRules
+        if type(category) == "number" then -- quality rules are listed in QualityRules
             Add(category, rule.name)
         end
     end
@@ -169,7 +169,7 @@ local function RuleCategories()
     return list
 end
 
--- Alle Qualitaetsstufen als Regel-Eintraege, Name in Qualitaetsfarbe (Namen liefert Blizzard)
+-- All quality levels as rule entries, name in quality color (names come from Blizzard)
 local function QualityRules()
     local list = {}
     for _, quality in ipairs(QUALITIES) do
@@ -185,11 +185,11 @@ local function QualityRules()
 end
 
 ---------------------------------------------------------------------------
--- Aenderungen
+-- Changes
 ---------------------------------------------------------------------------
 local function SetItemTag(itemID, tagID)
     if tagID == nil and RuleTagForItem(itemID) then
-        tagID = false -- sonst wuerde die Regel das Item sofort wieder einsortieren
+        tagID = false -- otherwise the rule would sort the item right back
     end
     Cubby.db.itemTags[itemID] = tagID
     TagsChanged()
@@ -244,7 +244,7 @@ local function ToggleCollapsed(tag)
     TagsChanged()
 end
 
--- Eine Kategorie gehoert immer nur zu einer Gruppe: Anhaken bei einer anderen Gruppe verschiebt sie.
+-- A category belongs to one group only: ticking it for another group moves it.
 local function ToggleRule(tag, category, label)
     if RuleTag(category) == tag then
         Cubby.db.rules[category] = nil
@@ -254,7 +254,7 @@ local function ToggleRule(tag, category, label)
     TagsChanged()
 end
 
--- Bereich in der Reihenfolge um delta Plaetze verschieben (-1 = nach oben)
+-- Move a section by delta places in the order (-1 = up)
 local function MoveArea(tag, delta)
     local list = AreaTagsInOrder()
     for i, other in ipairs(list) do

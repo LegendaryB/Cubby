@@ -1,6 +1,6 @@
--- Beim Haendler: Verkaufsschutz und das Verkaufen ganzer Bereiche.
--- Geschuetzte Items lassen sich dort weder per Rechtsklick verkaufen noch auf das Haendlerfenster
--- ziehen, und Blizzards "Schrott verkaufen" wartet, solange welche da sind.
+-- At the vendor: sell protection and selling whole sections.
+-- Protected items can neither be sold there by right-click nor dragged onto the vendor window,
+-- and Blizzard's "Sell junk" button waits while there are any.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -18,7 +18,7 @@ local function HasProtectedJunk()
     return false
 end
 
--- Blizzards "Schrott verkaufen" kennt keine Ausnahmen: sperren, solange geschuetzter Schrott da ist.
+-- Blizzard's "Sell junk" has no exceptions: disable it while protected junk is present.
 local function UpdateBlizzardJunkButton()
     local button = MerchantSellAllJunkButton
     if not button or not state.merchantOpen or not C_MerchantFrame or not C_MerchantFrame.GetNumJunkItems then
@@ -35,14 +35,14 @@ local function NotifySellProtected()
     UIErrorsFrame:AddMessage(L.SELL_PROTECTED_MESSAGE, 1, 0.3, 0.3)
 end
 
--- Rechtsklick auf ein geschuetztes Item beim Haendler: verkauft wird nicht, wir sagen nur warum.
+-- Right-click on a protected item at the vendor: nothing is sold, we just say why.
 local function OnItemMouseUp(button, mouseButton)
     if mouseButton == "RightButton" and button.cubbySellBlocked and button:IsMouseOver() then
         NotifySellProtected()
     end
 end
 
--- Liegt ein geschuetztes Item beim Haendler auf dem Mauszeiger, koennte man es dort ablegen: sofort zuruecklegen.
+-- A protected item on the cursor at the vendor could be dropped there: put it straight back.
 local function DropProtectedCursorItem()
     if not state.merchantOpen then
         return
@@ -54,7 +54,7 @@ local function DropProtectedCursorItem()
     end
 end
 
--- Beim Haendler verkauft nur der Rechtsklick; geschuetzte Items bekommen ihn dort nicht.
+-- At the vendor only the right-click sells; protected items do not get it there.
 local function UpdateSellProtection(button, tag)
     local blocked = state.merchantOpen and tag ~= nil and tag.noSell == true
     if button.cubbySellBlocked ~= blocked then
@@ -68,9 +68,9 @@ local function UpdateSellProtection(button, tag)
 end
 
 ---------------------------------------------------------------------------
--- Einen ganzen Bereich verkaufen
+-- Selling a whole section
 ---------------------------------------------------------------------------
--- Plaetze mit verkaufbaren Items dieser Gruppe; liefert die Liste, die Gesamtzahl und den Wert.
+-- Slots with sellable items of this group; returns the list, the total count and the value.
 local function SellableSlots(tag)
     local slots, count, value = {}, 0, 0
     for _, bag in ipairs(Cubby.TaggableBags()) do
@@ -88,7 +88,7 @@ local function SellableSlots(tag)
     return slots, count, value
 end
 
--- Verkauft direkt im Klick auf "Ja": falls WoW Verkaeufe nur auf einen echten Mausklick hin erlaubt.
+-- Sells directly in the click on "Yes", in case WoW only allows sales on a real mouse click.
 local function SellSection(tag)
     if not state.merchantOpen or tag.noSell then
         return

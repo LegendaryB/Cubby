@@ -1,10 +1,10 @@
--- Cubby: alle Taschen in einem Fenster.
--- Ersetzt nur die Anzeige. Oeffnen/Schliessen laeuft weiter ueber Blizzards Taschenlogik
--- (Tasten, Briefkasten, Haendler usw. funktionieren also wie gewohnt).
+-- Cubby: all bags in one window.
+-- Only replaces the display. Opening and closing still run through Blizzard's bag logic
+-- (key bindings, mailbox, vendor etc. keep working as usual).
 --
--- Alle Dateien teilen sich ueber "..." den Namensraum Cubby. Die Reihenfolge in Cubby.toc ist die
--- Ladereihenfolge: Werte aus frueheren Dateien duerfen oben in einer Datei zwischengespeichert werden,
--- Funktionen aus spaeteren Dateien werden erst beim Aufruf ueber Cubby.<Name> geholt.
+-- All files share the Cubby namespace through "...". The order in Cubby.toc is the
+-- load order: values from earlier files may be cached at the top of a file,
+-- functions from later files are only looked up via Cubby.<Name> when they are called.
 local _, Cubby = ...
 
 Cubby.DEFAULTS = {
@@ -18,7 +18,7 @@ Cubby.DEFAULTS = {
     locked = false,
 }
 
--- Masse in Pixeln
+-- Sizes in pixels
 Cubby.SLOT, Cubby.GAP, Cubby.PAD = 37, 4, 10
 Cubby.HEADER_H, Cubby.FOOTER_H, Cubby.SECTION_H = 58, 28, 18
 Cubby.EMPTY_SECTION_H = 24
@@ -29,18 +29,18 @@ local NUM_REAGENT_BAGS = Constants.InventoryConstants.NumReagentBagSlots or 0
 Cubby.KEYRING_BAG = BagIndex.Keyring
 Cubby.REAGENT_BAG = NUM_REAGENT_BAGS > 0 and BagIndex.ReagentBag or nil
 
--- Cubby.db: die gespeicherten Einstellungen (CubbyDB), gesetzt beim Einloggen in Events.lua.
+-- Cubby.db: the saved settings (CubbyDB), set at login in Events.lua.
 
--- Laufzeit-Zustand, den mehrere Dateien teilen
+-- Runtime state shared by several files
 Cubby.state = {
     searchText = "",
-    needLayout = true,     -- beim naechsten Aktualisieren auf jeden Fall neu anordnen
-    softLayout = false,    -- Items haben sich geaendert: neu anordnen, sobald die Maus nicht mehr ueber den Items ist
+    needLayout = true,     -- always re-arrange on the next refresh
+    softLayout = false,    -- items changed: re-arrange as soon as the mouse is no longer over the items
     merchantOpen = false,
-    failed = false,        -- nach einem Fehler laufen wieder Blizzards Taschen
+    failed = false,        -- after an error Blizzard's bags are used again
 }
 
--- Die gerade angezeigten Item-Buttons in Anzeigereihenfolge; das Layout fuellt die Liste.
+-- The item buttons currently shown, in display order; the layout fills the list.
 Cubby.active = {}
 
 function Cubby.Print(msg)
@@ -51,7 +51,7 @@ function Cubby.ErrorHandler(err)
     return tostring(err) .. "\n" .. (debugstack and debugstack(2, 12, 0) or "")
 end
 
--- Der Schluesselbund hat eine eigene Groessenabfrage (so macht es auch Blizzards Code).
+-- The keyring has its own size query (Blizzard's code does the same).
 function Cubby.NumSlots(bag)
     if bag == Cubby.KEYRING_BAG and GetKeyRingSize then
         return GetKeyRingSize() or 0
@@ -59,8 +59,8 @@ function Cubby.NumSlots(bag)
     return C_Container.GetContainerNumSlots(bag) or 0
 end
 
--- Haendlerwert eines Taschenplatzes in Kupfer. Noch nicht geladene Itemdaten zaehlen erst einmal 0;
--- GET_ITEM_INFO_RECEIVED loest danach eine neue Berechnung aus.
+-- Vendor value of a bag slot in copper. Item data that is not loaded yet counts as 0 for now;
+-- GET_ITEM_INFO_RECEIVED triggers a new calculation afterwards.
 function Cubby.SellValue(info)
     if not info or info.hasNoValue then
         return 0
@@ -69,7 +69,7 @@ function Cubby.SellValue(info)
     return (sellPrice or 0) * (info.stackCount or 1)
 end
 
--- Rucksack und die normalen Taschen
+-- Backpack and the regular bags
 function Cubby.MainBags()
     local bags = {}
     for bag = BagIndex.Backpack, NUM_BAGS do
@@ -78,7 +78,7 @@ function Cubby.MainBags()
     return bags
 end
 
--- Taschen, deren Items einer Gruppe angehoeren koennen: die normalen plus die Reagenzientasche
+-- Bags whose items can belong to a group: the regular ones plus the reagent bag
 function Cubby.TaggableBags()
     local bags = Cubby.MainBags()
     if Cubby.REAGENT_BAG then

@@ -1,4 +1,4 @@
--- Layout und Aktualisierung: verteilt die Taschenplaetze auf Bereiche und haelt die Anzeige aktuell.
+-- Layout and refresh: distributes the bag slots over sections and keeps the display up to date.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -8,19 +8,19 @@ local NumSlots, TagForItem, IsCollapsed = Cubby.NumSlots, Cubby.TagForItem, Cubb
 local sectionTitles = {}
 
 ---------------------------------------------------------------------------
--- Bereiche
+-- Sections
 ---------------------------------------------------------------------------
--- Liefert die Plaetze der Taschen als { bag, slot }. Mit tagSlots wandern Items,
--- deren Gruppe einen eigenen Bereich hat, stattdessen nach tagSlots[tagID].
--- Mit combineFree werden leere Plaetze nicht einzeln geliefert, sondern als ein Eintrag am Ende:
--- ein echter freier Platz mit freeCount = Anzahl aller freien Plaetze. Ein dort abgelegtes Item
--- landet dank Blizzards Button-Code genau auf diesem Platz.
+-- Returns the bag slots as { bag, slot }. With tagSlots, items whose group has its own section
+-- go to tagSlots[tagID] instead.
+-- With combineFree empty slots are not returned one by one but as a single entry at the end:
+-- a real free slot with freeCount = number of all free slots. An item dropped there
+-- lands on exactly that slot thanks to Blizzard's button code.
 local function CollectSlots(bags, tagSlots, combineFree)
     local slots = {}
     local freeCount, freeSlot, freeSlotIsSpecial = 0, nil, nil
     for _, bag in ipairs(bags) do
         local _, bagFamily = C_Container.GetContainerNumFreeSlots(bag)
-        local isSpecial = bagFamily ~= nil and bagFamily ~= 0 -- Spezialtaschen nehmen nicht jedes Item
+        local isSpecial = bagFamily ~= nil and bagFamily ~= 0 -- special bags do not accept every item
         for slot = 1, NumSlots(bag) do
             local itemID = C_Container.GetContainerItemID(bag, slot)
             if combineFree and not itemID then
@@ -52,8 +52,8 @@ local function ShowKeyring()
         and C_ActionBar.ShouldShowKeyring() and GetCVarBool("showKeyring") and NumSlots(keyring) > 0
 end
 
--- Reihenfolge: ungruppierte Items, Gruppenbereiche, Reagenzien, Schluesselbund.
--- Ein Bereich ist { slots, tag } fuer Gruppen, { slots, title } fuer feste Bereiche.
+-- Order: ungrouped items, group sections, reagents, keyring.
+-- A section is { slots, tag } for groups, { slots, title } for fixed sections.
 local function GetSections()
     local tagSlots = {}
     local combineFree = Cubby.db.combineFreeSlots
@@ -65,7 +65,7 @@ local function GetSections()
         reagentSlots = CollectSlots({ reagentBag }, tagSlots, combineFree)
     end
 
-    for _, tag in ipairs(Cubby.AreaTagsInOrder()) do -- auch leer anzeigen, damit man Items hineinziehen kann
+    for _, tag in ipairs(Cubby.AreaTagsInOrder()) do -- show even when empty, so items can be dragged in
         sections[#sections + 1] = { slots = tagSlots[tag.id] or {}, tag = tag }
     end
 
@@ -161,11 +161,11 @@ local function Layout()
 end
 
 ---------------------------------------------------------------------------
--- Aktualisierung
+-- Refresh
 ---------------------------------------------------------------------------
-local SafeRefresh -- unten definiert
+local SafeRefresh -- defined below
 
--- Unter der Maus darf nichts wegrutschen, sonst traefe der naechste Klick ein anderes Item.
+-- Nothing may slip away under the mouse, otherwise the next click would hit a different item.
 local waitingForMouse = false
 local function WaitForMouseLeave()
     if state.softLayout and frame:IsShown() and content:IsMouseOver() then
@@ -179,7 +179,7 @@ local function WaitForMouseLeave()
 end
 
 local function Refresh()
-    -- Beim Haendler nicht umordnen: waehrend eines Verkaufs bleibt alles stehen, danach wird aufgeraeumt.
+    -- Do not re-arrange at the vendor: during a sale everything stays put, it is tidied up afterwards.
     if state.needLayout or (state.softLayout and not state.merchantOpen and not content:IsMouseOver()) then
         Layout()
     end
@@ -196,7 +196,7 @@ local function Refresh()
     end
 end
 
--- Jeder Fehler beim Aktualisieren schaltet auf Blizzards Taschen zurueck, statt das Fenster kaputt zu lassen.
+-- Any error while refreshing falls back to Blizzard's bags instead of leaving the window broken.
 SafeRefresh = function()
     if state.failed then
         return
@@ -207,11 +207,11 @@ SafeRefresh = function()
     end
 end
 
--- Viele Events kommen kurz hintereinander; sie werden zu einer Aktualisierung zusammengefasst.
+-- Many events arrive in quick succession; they are merged into one refresh.
 local refreshPending = false
 local function ScheduleRefresh()
     if not frame:IsShown() or refreshPending then
-        return -- beim naechsten Oeffnen wird ohnehin komplett aktualisiert
+        return -- on the next open everything is refreshed anyway
     end
     refreshPending = true
     C_Timer.After(0.05, function()
@@ -222,7 +222,7 @@ local function ScheduleRefresh()
     end)
 end
 
--- Sofort neu anordnen (bei geschlossenem Fenster beim naechsten Oeffnen)
+-- Re-arrange immediately (when the window is closed, on the next open)
 local function RequestLayout()
     state.needLayout = true
     if frame:IsShown() then

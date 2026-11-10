@@ -1,4 +1,4 @@
--- Hauptfenster: Rahmen, Kopfzeile mit Buttons, Suchfeld, Fusszeile und Position.
+-- Main window: frame, header with buttons, search box, footer and position.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -12,10 +12,10 @@ Cubby.frame = frame
 
 local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 title:SetPoint("TOPLEFT", PAD, -PAD)
-title:SetText(COMBINED_BAG_TITLE or BACKPACK_TOOLTIP) -- derselbe Text wie in Blizzards Taschenfenster
+title:SetText(COMBINED_BAG_TITLE or BACKPACK_TOOLTIP) -- the same text as in Blizzard's bag window
 
 ---------------------------------------------------------------------------
--- Buttons oben rechts
+-- Buttons at the top right
 ---------------------------------------------------------------------------
 local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
 closeButton:SetPoint("TOPRIGHT", 2, 2)
@@ -55,7 +55,7 @@ optionsButton:SetScript("OnClick", function()
 end)
 
 ---------------------------------------------------------------------------
--- Suche
+-- Search
 ---------------------------------------------------------------------------
 local searchBox = CreateFrame("EditBox", "CubbySearchBox", frame, "SearchBoxTemplate")
 searchBox:SetHeight(20)
@@ -66,14 +66,14 @@ searchBox:HookScript("OnTextChanged", function(self)
     local wasSearching = state.searchText ~= ""
     state.searchText = (self:GetText() or ""):lower()
     if wasSearching ~= (state.searchText ~= "") then
-        Cubby.TagsChanged() -- eingeklappte Bereiche oeffnen bzw. wieder schliessen
+        Cubby.TagsChanged() -- open or re-close collapsed sections
     else
         Cubby.ApplySearch()
     end
 end)
 
 ---------------------------------------------------------------------------
--- Inhalt und Fusszeile
+-- Content and footer
 ---------------------------------------------------------------------------
 local content = CreateFrame("Frame", nil, frame)
 content:SetPoint("TOPLEFT", PAD, -Cubby.HEADER_H)
@@ -89,7 +89,7 @@ local valueText = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
 valueText:SetPoint("BOTTOM", 0, 10)
 valueText:Hide()
 
--- Haendlerwert aller Items in den Taschen
+-- Vendor value of all items in the bags
 local function UpdateValue()
     if not Cubby.db.showValue then
         valueText:Hide()
@@ -105,13 +105,13 @@ local function UpdateValue()
     valueText:Show()
 end
 
--- Wenig Platz in den Taschen: "Frei" wird gelb, bei fast vollen Taschen rot.
+-- Little space in the bags: "Free" turns yellow, red when the bags are nearly full.
 local FREE_WARNINGS = {
     { maxFree = 2, color = { 1, 0.25, 0.25 } },
     { maxFree = 5, color = { 1, 0.82, 0 } },
 }
 local NORMAL_COLOR = { 1, 1, 1 }
-local shownWarning -- nil = normale Farbe; die Schrift wird nur bei einem Wechsel umgefaerbt
+local shownWarning -- nil = normal color; the text is only recolored on a change
 
 local function UpdateFreeWarning(free)
     local warning
@@ -141,7 +141,7 @@ function Cubby.UpdateFooter()
 end
 
 ---------------------------------------------------------------------------
--- Position und Groesse
+-- Position and size
 ---------------------------------------------------------------------------
 function Cubby.RestorePosition()
     frame:ClearAllPoints()
@@ -153,7 +153,7 @@ function Cubby.RestorePosition()
     end
 end
 
--- Immer unten rechts verankern, damit das Fenster wie die Standardtaschen nach oben/links waechst.
+-- Always anchor at the bottom right so the window grows up/left like the default bags.
 local function SavePosition()
     local ratio = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
     local x = frame:GetRight() - UIParent:GetRight() * ratio
@@ -184,9 +184,9 @@ frame:SetScript("OnDragStop", function(self)
 end)
 
 ---------------------------------------------------------------------------
--- Oeffnen und Schliessen
+-- Opening and closing
 ---------------------------------------------------------------------------
--- Verstecken, wenn Blizzards Taschen schon zu sind: dann darf OnHide sie nicht noch einmal schliessen.
+-- Hide quietly when Blizzard's bags are already closed: OnHide must not close them a second time.
 function Cubby.HideWindowQuietly()
     frame.closingFromBlizzard = true
     frame:Hide()
@@ -205,7 +205,7 @@ frame:SetScript("OnHide", function(self)
         searchBox:SetText("")
     end
     searchBox:ClearFocus()
-    -- Per X oder ESC geschlossen: Blizzard mitteilen, dass die Taschen zu sind.
+    -- Closed with X or ESC: tell Blizzard that the bags are closed.
     if not self.closingFromBlizzard and IsAnyBagOpen() then
         CloseAllBags()
     end

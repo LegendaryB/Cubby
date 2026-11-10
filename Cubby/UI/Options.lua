@@ -1,4 +1,4 @@
--- Einstellungsfenster (Zahnrad-Button): links neben dem Hauptfenster.
+-- Options window (gear button): to the left of the main window.
 local _, Cubby = ...
 local frame = Cubby.frame
 local L = Cubby.L
@@ -14,7 +14,7 @@ local optionsClose = CreateFrame("Button", nil, options, "UIPanelCloseButton")
 optionsClose:SetPoint("TOPRIGHT", 2, 2)
 optionsClose:SetScript("OnClick", function() options:Hide() end)
 
--- Jede Zeile meldet hier, wie sie ihren angezeigten Wert auffrischt.
+-- Each row reports here how it refreshes its displayed value.
 local refreshers = {}
 local nextRowY = -36
 local ROW_H = 26
@@ -25,7 +25,7 @@ local function RefreshOptions()
     end
 end
 
--- Zeile mit Beschriftung links und [-] Wert [+] rechts
+-- Row with label on the left and [-] value [+] on the right
 local function AddStepper(label, getText, onStep)
     local text = options:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     text:SetPoint("TOPLEFT", 14, nextRowY - 4)
@@ -58,7 +58,7 @@ local function AddStepper(label, getText, onStep)
     nextRowY = nextRowY - ROW_H
 end
 
--- Checkbox fuer eine Ja/Nein-Einstellung in CubbyDB
+-- Checkbox for a yes/no setting in CubbyDB
 local function AddCheckbox(label, key)
     local check = CreateFrame("CheckButton", nil, options, "UICheckButtonTemplate")
     check:SetSize(24, 24)
@@ -83,7 +83,7 @@ AddStepper(L.COLUMNS, function() return Cubby.db.columns end, function(delta)
     Cubby.RequestLayout()
 end)
 AddStepper(L.SCALE, function() return ("%.2f"):format(Cubby.db.scale) end, function(delta)
-    -- in Schritten von 0,05
+    -- in steps of 0.05
     Cubby.SetWindowScale(math.floor((Cubby.db.scale + delta * 0.05) * 20 + 0.5) / 20)
 end)
 AddCheckbox(L.SHOW_ITEM_LEVEL, "showItemLevel")

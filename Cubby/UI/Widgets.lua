@@ -1,4 +1,4 @@
--- Bausteine, die mehrere Fenster nutzen: dunkle Fenster und Icon-Buttons.
+-- Building blocks that several windows use: dark windows and icon buttons.
 local _, Cubby = ...
 
 local BACKDROP = {
@@ -7,7 +7,7 @@ local BACKDROP = {
     edgeSize = 1,
 }
 
--- Dunkles, zunaechst verstecktes Fenster; ESC schliesst es.
+-- Dark window, initially hidden; ESC closes it.
 function Cubby.CreatePanel(name)
     local panel = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
     panel:Hide()
@@ -23,9 +23,9 @@ function Cubby.CreatePanel(name)
 end
 
 ---------------------------------------------------------------------------
--- Icon-Buttons
+-- Icon buttons
 ---------------------------------------------------------------------------
--- Alle Icons stammen aus Blizzards eigener Oberflaeche. Fehlt eines im Client, erscheint ein Textzeichen.
+-- All icons come from Blizzard's own UI. If the client lacks one, a text character is shown.
 local function GetAtlas(name)
     return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) or nil
 end
@@ -42,7 +42,7 @@ function Cubby.SetButtonIcon(button, atlas, fallback)
     button.glow:SetShown(info ~= nil)
     button.text:SetText(info and "" or fallback)
     if info then
-        -- Seitenverhaeltnis behalten: nicht alle Icons sind quadratisch
+        -- keep the aspect ratio: not all icons are square
         local box = button:GetWidth()
         local fit = math.min(box / info.width, box / info.height)
         button.icon:SetSize(info.width * fit, info.height * fit)
@@ -73,7 +73,7 @@ function Cubby.CreateIconButton(parent, size, tooltip)
     return button
 end
 
--- Gesperrte Buttons bleiben sichtbar, aber blass.
+-- Disabled buttons stay visible but pale.
 function Cubby.SetButtonEnabled(button, enabled)
     button:SetEnabled(enabled)
     button:SetAlpha(enabled and 1 or 0.25)

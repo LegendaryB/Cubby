@@ -1,6 +1,6 @@
--- Blizzards Taschenfenster verstecken und Cubbys Fenster mit ihnen auf- und zugehen lassen.
--- Die Blizzard-Fenster bleiben "offen" (IsShown), sind aber unsichtbar. So bleibt Blizzards Logik
--- (Tasten, Briefkasten, Haendler) intakt.
+-- Hide Blizzard's bag windows and let Cubby's window open and close together with them.
+-- The Blizzard windows stay "open" (IsShown) but are invisible. That keeps Blizzard's logic
+-- (key bindings, mailbox, vendor) working.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -43,7 +43,7 @@ local function RestoreBlizzardBags()
     end
 end
 
--- Bei einem Fehler: Meldung im Chat, Fehler speichern, Blizzard-Taschen zurueckholen.
+-- On an error: print a chat message, save the error, bring the Blizzard bags back.
 local function Fail(err)
     state.failed = true
     if Cubby.db then
@@ -55,7 +55,7 @@ local function Fail(err)
 end
 
 ---------------------------------------------------------------------------
--- Sichtbarkeit
+-- Visibility
 ---------------------------------------------------------------------------
 local syncPending = false
 local function SyncVisibility()
@@ -71,7 +71,7 @@ local function SyncVisibility()
     end
 end
 
--- Blizzard oeffnet und schliesst Taschen an vielen Stellen; nachgezogen wird einmal im naechsten Frame.
+-- Blizzard opens and closes bags in many places; we catch up once in the next frame.
 local function RequestSync()
     if syncPending then
         return
@@ -101,7 +101,7 @@ local function InstallHooks()
         hooksecurefunc("MerchantFrame_Update", Cubby.UpdateBlizzardJunkButton)
     end
 
-    -- Blizzard haengt die Taschen bei Vollbild-Fenstern um; danach wieder verstecken.
+    -- Blizzard re-parents the bags for fullscreen windows; hide them again afterwards.
     if ContainerFrame_SetFullScreenFrame then
         hooksecurefunc("ContainerFrame_SetFullScreenFrame", function(fullscreenFrame)
             HideBlizzardBags()
