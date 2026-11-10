@@ -1,5 +1,6 @@
--- Verkaufsschutz beim Haendler: geschuetzte Items lassen sich dort weder per Rechtsklick verkaufen
--- noch auf das Haendlerfenster ziehen, und Blizzards "Schrott verkaufen" wartet, solange welche da sind.
+-- Beim Haendler: Verkaufsschutz und das Verkaufen ganzer Bereiche.
+-- Geschuetzte Items lassen sich dort weder per Rechtsklick verkaufen noch auf das Haendlerfenster
+-- ziehen, und Blizzards "Schrott verkaufen" wartet, solange welche da sind.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -66,7 +67,42 @@ local function UpdateSellProtection(button, tag)
     end
 end
 
+---------------------------------------------------------------------------
+-- Einen ganzen Bereich verkaufen
+---------------------------------------------------------------------------
+-- Plaetze mit verkaufbaren Items dieser Gruppe; liefert die Liste, die Gesamtzahl und den Wert.
+local function SellableSlots(tag)
+    local slots, count, value = {}, 0, 0
+    for _, bag in ipairs(Cubby.TaggableBags()) do
+        for slot = 1, Cubby.NumSlots(bag) do
+            local info = C_Container.GetContainerItemInfo(bag, slot)
+            local slotValue = Cubby.SellValue(info)
+            if info and not info.isLocked and slotValue > 0 and Cubby.TagForItem(info.itemID) == tag
+                and not IsSellProtected(info.itemID) then
+                slots[#slots + 1] = { bag = bag, slot = slot, itemID = info.itemID }
+                count = count + (info.stackCount or 1)
+                value = value + slotValue
+            end
+        end
+    end
+    return slots, count, value
+end
+
+-- Verkauft direkt im Klick auf "Ja": falls WoW Verkaeufe nur auf einen echten Mausklick hin erlaubt.
+local function SellSection(tag)
+    if not state.merchantOpen or tag.noSell then
+        return
+    end
+    for _, entry in ipairs((SellableSlots(tag))) do
+        if C_Container.GetContainerItemID(entry.bag, entry.slot) == entry.itemID then
+            C_Container.UseContainerItem(entry.bag, entry.slot)
+        end
+    end
+end
+
 Cubby.UpdateBlizzardJunkButton = UpdateBlizzardJunkButton
 Cubby.OnItemMouseUp = OnItemMouseUp
 Cubby.DropProtectedCursorItem = DropProtectedCursorItem
 Cubby.UpdateSellProtection = UpdateSellProtection
+Cubby.SellableSlots = SellableSlots
+Cubby.SellSection = SellSection

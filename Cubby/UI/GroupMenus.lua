@@ -79,9 +79,31 @@ StaticPopupDialogs.CUBBY_TAG_DELETE = {
     whileDead = 1,
 }
 
+StaticPopupDialogs.CUBBY_SELL_SECTION = {
+    text = "%s",
+    button1 = YES,
+    button2 = NO,
+    OnAccept = function(_, tag)
+        Cubby.SellSection(tag)
+    end,
+    hideOnEscape = 1,
+    timeout = 0,
+    whileDead = 1,
+}
+
 -- itemID ist optional: die neue Gruppe bekommt dieses Item gleich zugewiesen.
 local function AskNewGroupName(itemID)
     StaticPopup_Show("CUBBY_TAG_NAME", L.NEW_GROUP_PROMPT, nil, { itemID = itemID })
+end
+
+-- Verkaufen-Button in der Kopfzeile: erst nachfragen, mit Anzahl und Wert
+local function AskSellSection(tag)
+    local slots, count, value = Cubby.SellableSlots(tag)
+    if #slots == 0 then
+        return
+    end
+    local text = L.SELL_SECTION_CONFIRM:format(count, tag.name, GetMoneyString(value, true))
+    StaticPopup_Show("CUBBY_SELL_SECTION", text, nil, tag)
 end
 
 ---------------------------------------------------------------------------
@@ -191,3 +213,4 @@ Cubby.PickTagColor = PickTagColor
 Cubby.OpenGroupMenu = OpenGroupMenu
 Cubby.OpenGroupsMenu = OpenGroupsMenu
 Cubby.OpenItemMenu = OpenItemMenu
+Cubby.AskSellSection = AskSellSection

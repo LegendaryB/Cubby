@@ -69,9 +69,19 @@ local function CreateGroupHeader()
     end)
     header.moveUp = moveUp
 
+    -- Nur beim Haendler sichtbar: alles im Bereich verkaufen (siehe UpdateGroupCounts)
+    local sell = CreateIconButton(header, 16, L.SELL_SECTION)
+    sell:SetPoint("RIGHT", moveUp, "LEFT", -4, 0)
+    SetButtonIcon(sell, "bags-junkcoin", "$")
+    sell:SetScript("OnClick", function(self)
+        Cubby.AskSellSection(HeaderTag(self))
+    end)
+    sell:Hide()
+    header.sell = sell
+
     header.label = header:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     header.label:SetPoint("LEFT", collapse, "RIGHT", 2, 0)
-    header.label:SetPoint("RIGHT", moveUp, "LEFT", -6, 0)
+    header.label:SetPoint("RIGHT", sell, "LEFT", -4, 0)
     header.label:SetJustifyH("LEFT")
     header.label:SetWordWrap(false)
 
@@ -149,6 +159,7 @@ local function UpdateGroupCounts()
             local value = values[tag.id] or 0
             local valueText = (Cubby.db.showValue and value > 0) and ("  " .. GetMoneyString(value, true)) or ""
             header.label:SetText(("%s |cff888888(%d)|r%s%s"):format(TagLabel(tag), counts[tag.id] or 0, newMark, valueText))
+            header.sell:SetShown(state.merchantOpen and not tag.noSell and value > 0)
         end
     end
 end
