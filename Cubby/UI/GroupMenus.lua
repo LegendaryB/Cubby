@@ -88,23 +88,32 @@ end
 -- Menues
 ---------------------------------------------------------------------------
 -- Untermenue "Automatisch einsortieren": eine Checkbox pro Item-Kategorie
+local function AddRuleCheckbox(description, tag, entry)
+    local category, label = entry.category, entry.label
+    local owner = Cubby.RuleTag(category)
+    local text = label
+    if owner and owner ~= tag then
+        text = text .. L.RULE_OWNER:format(owner.name)
+    end
+    description:CreateCheckbox(text, function()
+        return Cubby.RuleTag(category) == tag
+    end, function()
+        Cubby.ToggleRule(tag, category, label)
+    end)
+end
+
+-- Untermenue "Automatisch einsortieren": oben die Qualitaetsstufen, darunter die Item-Kategorien
 local function AddRuleEntries(description, tag)
+    for _, entry in ipairs(Cubby.QualityRules()) do
+        AddRuleCheckbox(description, tag, entry)
+    end
+    description:CreateDivider()
     local categories = Cubby.RuleCategories()
     if #categories == 0 then
         description:CreateTitle(L.NO_ITEMS_IN_BAGS)
     end
     for _, entry in ipairs(categories) do
-        local category, label = entry.category, entry.label
-        local owner = Cubby.RuleTag(category)
-        local text = label
-        if owner and owner ~= tag then
-            text = text .. L.RULE_OWNER:format(owner.name)
-        end
-        description:CreateCheckbox(text, function()
-            return Cubby.RuleTag(category) == tag
-        end, function()
-            Cubby.ToggleRule(tag, category, label)
-        end)
+        AddRuleCheckbox(description, tag, entry)
     end
 end
 

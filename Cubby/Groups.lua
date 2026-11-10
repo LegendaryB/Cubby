@@ -4,9 +4,14 @@
 -- In CubbyDB:
 --   tags[id]         = { id, name, r, g, b, noSell, section, order, collapsed }
 --   itemTags[itemID] = Gruppen-ID, oder false fuer "bewusst keine Gruppe" (schlaegt auch Regeln)
---   rules[Kategorie] = { tagID, name }: alle Items dieser Kategorie gehoeren automatisch zur Gruppe
+--   rules[Kategorie] = { tagID, name }: alle Items dieser Kategorie gehoeren automatisch zur Gruppe.
+--                      Kategorie ist eine Zahl (Itemklasse) oder "q0".."q5" (Qualitaet).
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
+
+-- Qualitaetsstufen fuer Regeln: Schlecht (grau) bis Legendaer
+local QUALITIES = { 0, 1, 2, 3, 4, 5 }
 
 local NEW_TAG_COLORS = {
     { 0.25, 0.65, 1 }, { 0.3, 0.85, 0.4 }, { 1, 0.8, 0.2 }, { 0.8, 0.45, 1 }, { 1, 0.55, 0.2 },
@@ -40,9 +45,19 @@ local function RuleTag(category)
     return rule and Cubby.db.tags[rule.tagID] or nil
 end
 
+local function QualityKey(quality)
+    return "q" .. quality
+end
+
+-- Eine Kategorie-Regel ist genauer als eine Qualitaets-Regel und gewinnt deshalb.
 local function RuleTagForItem(itemID)
     local category = ItemCategory(itemID)
-    return category and RuleTag(category) or nil
+    local tag = category and RuleTag(category)
+    if tag then
+        return tag
+    end
+    local quality = C_Item.GetItemQualityByID(itemID)
+    return quality and RuleTag(QualityKey(quality)) or nil
 end
 
 -- Die Zuweisung von Hand hat immer Vorrang vor einer Regel.
@@ -133,7 +148,9 @@ local function RuleCategories()
         end
     end
     for category, rule in pairs(Cubby.db.rules) do
-        Add(category, rule.name)
+        if type(category) == "number" then -- Qualitaets-Regeln stehen in QualityRules
+            Add(category, rule.name)
+        end
     end
     for _, bag in ipairs(Cubby.TaggableBags()) do
         for slot = 1, Cubby.NumSlots(bag) do
@@ -149,6 +166,21 @@ local function RuleCategories()
     table.sort(list, function(a, b)
         return a.label:lower() < b.label:lower()
     end)
+    return list
+end
+
+-- Alle Qualitaetsstufen als Regel-Eintraege, Name in Qualitaetsfarbe (Namen liefert Blizzard)
+local function QualityRules()
+    local list = {}
+    for _, quality in ipairs(QUALITIES) do
+        local name = _G["ITEM_QUALITY" .. quality .. "_DESC"] or tostring(quality)
+        local color = ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality]
+        if color then
+            name = ("|cff%02x%02x%02x%s|r"):format(
+                math.floor(color.r * 255 + 0.5), math.floor(color.g * 255 + 0.5), math.floor(color.b * 255 + 0.5), name)
+        end
+        list[#list + 1] = { category = QualityKey(quality), label = L.QUALITY_RULE:format(name) }
+    end
     return list
 end
 
@@ -249,6 +281,7 @@ Cubby.HasSectionTags = HasSectionTags
 Cubby.IsCollapsed = IsCollapsed
 Cubby.RuleTag = RuleTag
 Cubby.RuleCategories = RuleCategories
+Cubby.QualityRules = QualityRules
 Cubby.SetItemTag = SetItemTag
 Cubby.CreateTag = CreateTag
 Cubby.RenameTag = RenameTag
