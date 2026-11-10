@@ -121,12 +121,13 @@ local function UpdateMoveButtons(count)
     end
 end
 
-local function AddBagCounts(bag, counts, hasNew)
+local function AddBagCounts(bag, counts, values, hasNew)
     for slot = 1, Cubby.NumSlots(bag) do
         local info = C_Container.GetContainerItemInfo(bag, slot)
         local tag = info and TagForItem(info.itemID)
         if tag then
             counts[tag.id] = (counts[tag.id] or 0) + (info.stackCount or 1)
+            values[tag.id] = (values[tag.id] or 0) + Cubby.SellValue(info)
             if C_NewItems.IsNewItem(bag, slot) then
                 hasNew[tag.id] = true
             end
@@ -136,16 +137,18 @@ end
 
 -- Eigener Durchlauf statt Zaehlen im Layout: beim Haendler ruht das Layout, die Zahl soll aber stimmen.
 local function UpdateGroupCounts()
-    local counts, hasNew = {}, {}
+    local counts, values, hasNew = {}, {}, {}
     for _, bag in ipairs(Cubby.TaggableBags()) do
-        AddBagCounts(bag, counts, hasNew)
+        AddBagCounts(bag, counts, values, hasNew)
     end
     for _, header in ipairs(groupHeaders) do
         if header:IsShown() then
             local tag = header.tag
             -- Offene Bereiche brauchen das nicht: dort leuchtet das Item selbst.
             local newMark = (hasNew[tag.id] and IsCollapsed(tag)) and (" |cff66dd66%s|r"):format(L.NEW_ITEMS) or ""
-            header.label:SetText(("%s |cff888888(%d)|r%s"):format(TagLabel(tag), counts[tag.id] or 0, newMark))
+            local value = values[tag.id] or 0
+            local valueText = (Cubby.db.showValue and value > 0) and ("  " .. GetMoneyString(value, true)) or ""
+            header.label:SetText(("%s |cff888888(%d)|r%s%s"):format(TagLabel(tag), counts[tag.id] or 0, newMark, valueText))
         end
     end
 end

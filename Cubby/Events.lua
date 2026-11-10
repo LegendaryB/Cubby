@@ -108,6 +108,7 @@ end
 events.QUEST_ACCEPTED = RefreshSoon
 events.QUEST_REMOVED = RefreshSoon
 events.BAG_NEW_ITEMS_UPDATED = RefreshSoon
+events.GET_ITEM_INFO_RECEIVED = RefreshSoon -- Itemdaten fuer den Haendlerwert sind nachgeladen
 
 frame:SetScript("OnEvent", function(_, event, ...)
     if not Cubby.db and event ~= "PLAYER_LOGIN" then

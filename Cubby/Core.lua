@@ -14,6 +14,7 @@ Cubby.DEFAULTS = {
     showBoE = true,
     showKeyring = true,
     combineFreeSlots = true,
+    showValue = true,
     locked = false,
 }
 
@@ -56,6 +57,16 @@ function Cubby.NumSlots(bag)
         return GetKeyRingSize() or 0
     end
     return C_Container.GetContainerNumSlots(bag) or 0
+end
+
+-- Haendlerwert eines Taschenplatzes in Kupfer. Noch nicht geladene Itemdaten zaehlen erst einmal 0;
+-- GET_ITEM_INFO_RECEIVED loest danach eine neue Berechnung aus.
+function Cubby.SellValue(info)
+    if not info or info.hasNoValue then
+        return 0
+    end
+    local sellPrice = select(11, C_Item.GetItemInfo(info.itemID))
+    return (sellPrice or 0) * (info.stackCount or 1)
 end
 
 -- Rucksack und die normalen Taschen

@@ -53,6 +53,8 @@ local enUS = {
     MARK_BOE = "Mark BoE items",
     SHOW_KEYRING = "Show keyring",
     COMBINE_FREE_SLOTS = "Combine free slots",
+    SHOW_VALUE = "Show vendor value",
+    VENDOR_VALUE = "Value: %s",
     LOCK_WINDOW = "Lock window",
     RESET_POSITION = "Reset position",
 
@@ -106,6 +108,8 @@ local deDE = {
     MARK_BOE = "BoE markieren",
     SHOW_KEYRING = "Schlüsselbund anzeigen",
     COMBINE_FREE_SLOTS = "Freie Plätze bündeln",
+    SHOW_VALUE = "Händlerwert anzeigen",
+    VENDOR_VALUE = "Wert: %s",
     LOCK_WINDOW = "Fenster festsetzen",
     RESET_POSITION = "Position zurücksetzen",
 
