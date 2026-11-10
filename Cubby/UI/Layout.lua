@@ -12,18 +12,36 @@ local sectionTitles = {}
 ---------------------------------------------------------------------------
 -- Liefert die Plaetze der Taschen als { bag, slot }. Mit tagSlots wandern Items,
 -- deren Gruppe einen eigenen Bereich hat, stattdessen nach tagSlots[tagID].
-local function CollectSlots(bags, tagSlots)
+-- Mit combineFree werden leere Plaetze nicht einzeln geliefert, sondern als ein Eintrag am Ende:
+-- ein echter freier Platz mit freeCount = Anzahl aller freien Plaetze. Ein dort abgelegtes Item
+-- landet dank Blizzards Button-Code genau auf diesem Platz.
+local function CollectSlots(bags, tagSlots, combineFree)
     local slots = {}
+    local freeCount, freeSlot, freeSlotIsSpecial = 0, nil, nil
     for _, bag in ipairs(bags) do
+        local _, bagFamily = C_Container.GetContainerNumFreeSlots(bag)
+        local isSpecial = bagFamily ~= nil and bagFamily ~= 0 -- Spezialtaschen nehmen nicht jedes Item
         for slot = 1, NumSlots(bag) do
-            local tag = tagSlots and TagForItem(C_Container.GetContainerItemID(bag, slot))
-            local target = slots
-            if tag and tag.section then
-                tagSlots[tag.id] = tagSlots[tag.id] or {}
-                target = tagSlots[tag.id]
+            local itemID = C_Container.GetContainerItemID(bag, slot)
+            if combineFree and not itemID then
+                freeCount = freeCount + 1
+                if not freeSlot or (freeSlotIsSpecial and not isSpecial) then
+                    freeSlot, freeSlotIsSpecial = { bag, slot }, isSpecial
+                end
+            else
+                local tag = tagSlots and TagForItem(itemID)
+                local target = slots
+                if tag and tag.section then
+                    tagSlots[tag.id] = tagSlots[tag.id] or {}
+                    target = tagSlots[tag.id]
+                end
+                target[#target + 1] = { bag, slot }
             end
-            target[#target + 1] = { bag, slot }
         end
+    end
+    if freeSlot then
+        freeSlot.freeCount = freeCount
+        slots[#slots + 1] = freeSlot
     end
     return slots
 end
@@ -38,12 +56,13 @@ end
 -- Ein Bereich ist { slots, tag } fuer Gruppen, { slots, title } fuer feste Bereiche.
 local function GetSections()
     local tagSlots = {}
-    local sections = { { slots = CollectSlots(Cubby.MainBags(), tagSlots), zoneTag = Cubby.NO_GROUP_ZONE } }
+    local combineFree = Cubby.db.combineFreeSlots
+    local sections = { { slots = CollectSlots(Cubby.MainBags(), tagSlots, combineFree), zoneTag = Cubby.NO_GROUP_ZONE } }
 
     local reagentBag = Cubby.REAGENT_BAG
     local reagentSlots
     if reagentBag and NumSlots(reagentBag) > 0 then
-        reagentSlots = CollectSlots({ reagentBag }, tagSlots)
+        reagentSlots = CollectSlots({ reagentBag }, tagSlots, combineFree)
     end
 
     for _, tag in ipairs(Cubby.AreaTagsInOrder()) do -- auch leer anzeigen, damit man Items hineinziehen kann
@@ -108,6 +127,7 @@ local function Layout()
         local index = 0
         for _, entry in ipairs(collapsed and {} or section.slots) do
             local button = Cubby.GetButton(entry[1], entry[2])
+            button.cubbyFreeCount = entry.freeCount
             button:ClearAllPoints()
             button:SetPoint("TOPLEFT", content, "TOPLEFT",
                 (index % columns) * step,

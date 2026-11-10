@@ -13,6 +13,7 @@ Cubby.DEFAULTS = {
     showItemLevel = true,
     showBoE = true,
     showKeyring = true,
+    combineFreeSlots = true,
     locked = false,
 }
 

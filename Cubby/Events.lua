@@ -63,8 +63,10 @@ function events.BAG_CONTAINER_UPDATE()
     ScheduleRefresh()
 end
 
+-- Items haben sich bewegt. Neu anordnen muss nur, wer Bereiche hat oder freie Plaetze buendelt:
+-- sonst steht jeder Platz fest an seiner Stelle.
 function events.BAG_UPDATE_DELAYED()
-    state.softLayout = state.softLayout or Cubby.HasSectionTags()
+    state.softLayout = state.softLayout or Cubby.HasSectionTags() or Cubby.db.combineFreeSlots
     ScheduleRefresh()
 end
 

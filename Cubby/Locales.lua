@@ -52,6 +52,7 @@ local enUS = {
     SHOW_ITEM_LEVEL = "Show item level",
     MARK_BOE = "Mark BoE items",
     SHOW_KEYRING = "Show keyring",
+    COMBINE_FREE_SLOTS = "Combine free slots",
     LOCK_WINDOW = "Lock window",
     RESET_POSITION = "Reset position",
 
@@ -104,6 +105,7 @@ local deDE = {
     SHOW_ITEM_LEVEL = "Itemlevel anzeigen",
     MARK_BOE = "BoE markieren",
     SHOW_KEYRING = "Schlüsselbund anzeigen",
+    COMBINE_FREE_SLOTS = "Freie Plätze bündeln",
     LOCK_WINDOW = "Fenster festsetzen",
     RESET_POSITION = "Position zurücksetzen",
 

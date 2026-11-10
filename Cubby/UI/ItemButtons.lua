@@ -67,6 +67,12 @@ local function CreateItemButton(bag, slot)
     letter:Hide()
     button.cubbyTagLetter = letter
 
+    -- Anzahl der freien Plaetze, wenn dieser leere Platz sie alle vertritt
+    local free = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalLarge")
+    free:SetPoint("CENTER")
+    free:Hide()
+    button.cubbyFree = free
+
     local edges = {}
     for i, side in ipairs(TAG_EDGES) do
         local edge = button:CreateTexture(nil, "OVERLAY", nil, 7)
@@ -224,6 +230,14 @@ local function UpdateButton(button)
         button.cubbyBind:Show()
     else
         button.cubbyBind:Hide()
+    end
+
+    -- Liegt inzwischen ein Item auf dem Platz, bis zum naechsten Umordnen keine Zahl zeigen
+    if button.cubbyFreeCount and not texture then
+        button.cubbyFree:SetText(button.cubbyFreeCount)
+        button.cubbyFree:Show()
+    else
+        button.cubbyFree:Hide()
     end
 
     SetSearchMatch(button, MatchesSearch(link, itemID))
