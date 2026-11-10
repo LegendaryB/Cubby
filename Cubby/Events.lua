@@ -110,6 +110,13 @@ events.QUEST_REMOVED = RefreshSoon
 events.BAG_NEW_ITEMS_UPDATED = RefreshSoon
 events.GET_ITEM_INFO_RECEIVED = RefreshSoon -- item data for the vendor value has been loaded
 
+-- The game finished (or updated) its own item search: pick up which slots it found.
+function events.INVENTORY_SEARCH_UPDATE()
+    if frame:IsShown() and state.searchText ~= "" then
+        Cubby.ApplySearch()
+    end
+end
+
 frame:SetScript("OnEvent", function(_, event, ...)
     if not Cubby.db and event ~= "PLAYER_LOGIN" then
         return -- there are no settings before login

@@ -66,6 +66,11 @@ Cubby.searchBox = searchBox
 searchBox:HookScript("OnTextChanged", function(self)
     local wasSearching = state.searchText ~= ""
     state.searchText = (self:GetText() or ""):lower()
+    -- The game's own item search (the one the default bags use) finds more than names, e.g. item
+    -- type and tooltip text. Its result arrives as isFiltered on each slot, see MatchesSearch.
+    if C_Container.SetItemSearch then
+        C_Container.SetItemSearch(self:GetText() or "")
+    end
     if wasSearching ~= (state.searchText ~= "") then
         Cubby.TagsChanged() -- open or re-close collapsed sections
     else

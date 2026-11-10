@@ -141,17 +141,26 @@ local function QualityColor(quality)
     return 1, 1, 1
 end
 
--- Search matches the item name and the group name.
-local function MatchesSearch(link, itemID)
+-- A slot matches the search if the game's own item search finds it (it looks beyond the name,
+-- see Window.lua), or the item name or the group name contains the text. info.isFiltered is true
+-- for items the game's search does not find. It only counts if we could hand the text to the game's
+-- search at all: without that it stays false for every item.
+local function MatchesSearch(info)
     local searchText = state.searchText
     if searchText == "" then
         return true
     end
-    local name = link and link:match("%[(.-)%]")
+    if not info then
+        return false
+    end
+    if C_Container.SetItemSearch and info.isFiltered == false then
+        return true
+    end
+    local name = info.hyperlink and info.hyperlink:match("%[(.-)%]")
     if name and name:lower():find(searchText, 1, true) then
         return true
     end
-    local tag = TagForItem(itemID)
+    local tag = TagForItem(info.itemID)
     return tag ~= nil and tag.name:lower():find(searchText, 1, true) ~= nil
 end
 
@@ -266,14 +275,13 @@ local function UpdateButton(button)
     end
 
     ApplyBagHighlight(button)
-    SetSearchMatch(button, MatchesSearch(link, itemID))
+    SetSearchMatch(button, MatchesSearch(info))
 end
 
 -- Only re-evaluate the search matches, without fully updating the buttons
 local function ApplySearch()
     for _, button in ipairs(Cubby.active) do
-        local bag, slot = button:GetBagID(), button:GetID()
-        SetSearchMatch(button, MatchesSearch(C_Container.GetContainerItemLink(bag, slot), C_Container.GetContainerItemID(bag, slot)))
+        SetSearchMatch(button, MatchesSearch(C_Container.GetContainerItemInfo(button:GetBagID(), button:GetID())))
     end
 end
 

@@ -4,7 +4,7 @@ Bag addon for **WoW Forever**: all your bags in one window, organized into your 
 
 ## Features
 
-- All bags in a single window, with search by item name and group name
+- All bags in a single window, with search that uses the game's own item search (the one the default bags use) and also finds group names
 - **Groups** with their own color, optionally shown as a separate section in the window
 - **Auto-sort rules:** assign whole item categories (e.g. "Trade Goods: Cloth") to a group
 - **Sell protection** per group: protected items can't be sold to vendors
