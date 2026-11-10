@@ -16,7 +16,14 @@ The in-game interface is currently in German.
 
 ## Installation
 
-Copy the `Cubby` folder to `World of Warcraft\_forever_\Interface\AddOns\` and start the game.
+Download `Cubby-vX.Y.Z.zip` from the [latest release](https://github.com/LegendaryB/Cubby/releases/latest), extract it into `World of Warcraft\_forever_\Interface\AddOns\` and start the game.
+
+## Releasing
+
+1. Set `## Version` in `Cubby/Cubby.toc` to the new version and merge that into `main`.
+2. Tag the commit and push the tag, e.g. `git tag v1.0.1 && git push origin v1.0.1`.
+
+The [release workflow](.github/workflows/release.yml) checks that the tag matches the TOC version, builds the zip and publishes a GitHub release with the commit messages since the previous tag.
 
 ## Usage
 
