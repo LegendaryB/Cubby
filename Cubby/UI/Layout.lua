@@ -1,6 +1,7 @@
 -- Layout und Aktualisierung: verteilt die Taschenplaetze auf Bereiche und haelt die Anzeige aktuell.
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
 local frame, content, active = Cubby.frame, Cubby.content, Cubby.active
 local NumSlots, TagForItem, IsCollapsed = Cubby.NumSlots, Cubby.TagForItem, Cubby.IsCollapsed
 
@@ -50,11 +51,11 @@ local function GetSections()
     end
 
     if reagentSlots and #reagentSlots > 0 then
-        sections[#sections + 1] = { title = "Reagenzien", slots = reagentSlots }
+        sections[#sections + 1] = { title = L.REAGENTS, slots = reagentSlots }
     end
 
     if ShowKeyring() then
-        sections[#sections + 1] = { title = KEYRING or "Schlüsselbund", slots = CollectSlots({ Cubby.KEYRING_BAG }) }
+        sections[#sections + 1] = { title = KEYRING or L.KEYRING, slots = CollectSlots({ Cubby.KEYRING_BAG }) }
     end
 
     return sections

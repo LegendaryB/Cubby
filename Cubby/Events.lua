@@ -14,10 +14,8 @@ local function LoadSettings()
         end
     end
     db.lastError = nil
-    if not db.tags then
-        db.tags = { { id = 1, name = "Nicht verkaufen", r = 1, g = 0.25, b = 0.25, noSell = true } }
-        db.nextTagID = 2
-    end
+    db.tags = db.tags or {}
+    db.nextTagID = db.nextTagID or 1
     db.itemTags = db.itemTags or {}
     db.rules = db.rules or {}
     for _, tag in ipairs(Cubby.SortedTags()) do -- aeltere Gruppen behalten ihre bisherige (alphabetische) Reihenfolge

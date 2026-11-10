@@ -1,13 +1,15 @@
 ## Interface: 16001, 120105
 ## Title: Cubby
-## Notes: Alle Taschen in einem Fenster - mit Suche, Gruppen, Verkaufsschutz, Itemlevel und BoE-Markierung.
+## Notes: All bags in one window - with search, groups, sell protection, item level and BoE labels.
+## Notes-deDE: Alle Taschen in einem Fenster - mit Suche, Gruppen, Verkaufsschutz, Itemlevel und BoE-Markierung.
 ## Author: Daniel
-## Version: 1.0.0
+## Version: 1.1.0
 ## IconTexture: Interface\Icons\INV_Misc_Bag_08
 ## SavedVariables: CubbyDB
 
 # Grundlagen und Logik
 Core.lua
+Locales.lua
 UI\Widgets.lua
 Groups.lua
 SellProtection.lua

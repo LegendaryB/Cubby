@@ -3,9 +3,10 @@
 -- verdecken, sonst wuerde Blizzards Klickcode die Items stattdessen vertauschen.
 local _, Cubby = ...
 local TagForItem = Cubby.TagForItem
+local L = Cubby.L
 
 -- Flaeche des ungruppierten Bereichs: wird wie eine Gruppe gezeichnet, entfernt aber die Gruppe.
-Cubby.NO_GROUP_ZONE = { name = "Keine Gruppe", r = 0.6, g = 0.6, b = 0.6, clearsGroup = true }
+Cubby.NO_GROUP_ZONE = { name = L.NO_GROUP, r = 0.6, g = 0.6, b = 0.6, clearsGroup = true }
 
 local dropZones = {}
 
@@ -66,7 +67,7 @@ local function PlaceDropZone(index, zoneTag, top, width, height)
     zone:ClearAllPoints()
     zone:SetPoint("TOPLEFT", Cubby.content, "TOPLEFT", 0, -top)
     zone:SetSize(width, height)
-    zone.text:SetText("Ablegen in: " .. zoneTag.name)
+    zone.text:SetText(L.DROP_INTO:format(zoneTag.name))
     PaintDropZone(zone, 0.25)
 end
 

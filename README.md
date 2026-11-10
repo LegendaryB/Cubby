@@ -12,7 +12,7 @@ Bag addon for **WoW Forever**: all your bags in one window, organized into your 
 - Item level and BoE labels, plus a marker for new items
 - Options window for columns, scale and display settings
 
-The in-game interface is currently in German.
+The interface follows the client language: German on German clients, English on all others.
 
 ## Installation
 

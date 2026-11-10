@@ -3,6 +3,7 @@
 -- (Tasten, Briefkasten, Haendler) intakt.
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
 local frame = Cubby.frame
 
 local hiddenParent = CreateFrame("Frame")
@@ -48,7 +49,7 @@ local function Fail(err)
     if Cubby.db then
         Cubby.db.lastError = err
     end
-    Cubby.Print("|cffff4040Fehler, zurück zu den Standardtaschen:|r " .. tostring(err):match("^[^\n]*"))
+    Cubby.Print("|cffff4040" .. L.FALLBACK_ERROR .. "|r " .. tostring(err):match("^[^\n]*"))
     RestoreBlizzardBags()
     Cubby.HideWindowQuietly()
 end

@@ -1,6 +1,7 @@
 -- Menues und Dialoge rund um Gruppen: Gruppen-Button, Kopfzeilen-Menue und Alt+Linksklick auf ein Item.
 local _, Cubby = ...
 local TagLabel, SortedTags, TagsChanged = Cubby.TagLabel, Cubby.SortedTags, Cubby.TagsChanged
+local L = Cubby.L
 
 local function PickTagColor(tag)
     ColorPickerFrame:SetupColorPickerAndShow({
@@ -67,7 +68,7 @@ StaticPopupDialogs.CUBBY_TAG_NAME = {
 }
 
 StaticPopupDialogs.CUBBY_TAG_DELETE = {
-    text = "Gruppe \"%s\" löschen? Alle Items verlieren diese Gruppe und damit auch einen Verkaufsschutz.",
+    text = L.DELETE_CONFIRM,
     button1 = YES,
     button2 = NO,
     OnAccept = function(_, tag)
@@ -80,7 +81,7 @@ StaticPopupDialogs.CUBBY_TAG_DELETE = {
 
 -- itemID ist optional: die neue Gruppe bekommt dieses Item gleich zugewiesen.
 local function AskNewGroupName(itemID)
-    StaticPopup_Show("CUBBY_TAG_NAME", "Name für die neue Gruppe:", nil, { itemID = itemID })
+    StaticPopup_Show("CUBBY_TAG_NAME", L.NEW_GROUP_PROMPT, nil, { itemID = itemID })
 end
 
 ---------------------------------------------------------------------------
@@ -90,14 +91,14 @@ end
 local function AddRuleEntries(description, tag)
     local categories = Cubby.RuleCategories()
     if #categories == 0 then
-        description:CreateTitle("Keine Items in den Taschen")
+        description:CreateTitle(L.NO_ITEMS_IN_BAGS)
     end
     for _, entry in ipairs(categories) do
         local category, label = entry.category, entry.label
         local owner = Cubby.RuleTag(category)
         local text = label
         if owner and owner ~= tag then
-            text = text .. " (in: " .. owner.name .. ")"
+            text = text .. L.RULE_OWNER:format(owner.name)
         end
         description:CreateCheckbox(text, function()
             return Cubby.RuleTag(category) == tag
@@ -109,24 +110,24 @@ end
 
 -- Einstellungen einer Gruppe; dieselben Eintraege im Gruppen-Button und im Kopfzeilen-Menue
 local function AddTagEditEntries(description, tag)
-    description:CreateCheckbox("Verkaufsschutz", function()
+    description:CreateCheckbox(L.SELL_PROTECTION, function()
         return tag.noSell
     end, function()
         Cubby.ToggleSellProtection(tag)
     end)
-    description:CreateCheckbox("Als Bereich anzeigen", function()
+    description:CreateCheckbox(L.SHOW_AS_SECTION, function()
         return tag.section
     end, function()
         Cubby.ToggleSection(tag)
     end)
-    AddRuleEntries(description:CreateButton("Automatisch einsortieren"), tag)
-    description:CreateButton("Farbe ändern ...", function()
+    AddRuleEntries(description:CreateButton(L.AUTO_SORT), tag)
+    description:CreateButton(L.CHANGE_COLOR, function()
         PickTagColor(tag)
     end)
-    description:CreateButton("Umbenennen ...", function()
-        StaticPopup_Show("CUBBY_TAG_NAME", "Neuer Name:", nil, { tag = tag })
+    description:CreateButton(L.RENAME, function()
+        StaticPopup_Show("CUBBY_TAG_NAME", L.RENAME_PROMPT, nil, { tag = tag })
     end)
-    description:CreateButton("Löschen ...", function()
+    description:CreateButton(L.DELETE, function()
         StaticPopup_Show("CUBBY_TAG_DELETE", tag.name, nil, tag)
     end)
 end
@@ -142,7 +143,7 @@ end
 -- Gruppen-Button: neue Gruppe anlegen und alle Gruppen bearbeiten, auch solche ohne Bereich
 local function OpenGroupsMenu(owner)
     MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateButton("Neue Gruppe ...", function()
+        root:CreateButton(L.NEW_GROUP, function()
             AskNewGroupName()
         end)
         root:CreateDivider()
@@ -155,7 +156,7 @@ end
 -- Alt+Linksklick auf ein Item: Gruppe zuweisen
 local function OpenItemMenu(owner, itemID)
     MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(C_Item.GetItemInfo(itemID) or "Gruppe wählen")
+        root:CreateTitle(C_Item.GetItemInfo(itemID) or L.CHOOSE_GROUP)
 
         local function IsSelected(tagID)
             local tag = Cubby.TagForItem(itemID)
@@ -168,10 +169,10 @@ local function OpenItemMenu(owner, itemID)
         for _, tag in ipairs(SortedTags()) do
             root:CreateRadio(TagLabel(tag), IsSelected, Select, tag.id)
         end
-        root:CreateRadio("Keine Gruppe", IsSelected, Select, nil)
+        root:CreateRadio(L.NO_GROUP, IsSelected, Select, nil)
 
         root:CreateDivider()
-        root:CreateButton("Neue Gruppe ...", function()
+        root:CreateButton(L.NEW_GROUP, function()
             AskNewGroupName(itemID)
         end)
     end)

@@ -2,6 +2,7 @@
 -- daneben Einklappen, Verschieben, Verkaufsschutz und Farbe.
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
 local CreateIconButton, SetButtonIcon, SetButtonEnabled = Cubby.CreateIconButton, Cubby.SetButtonIcon, Cubby.SetButtonEnabled
 local IsCollapsed, TagLabel, TagForItem = Cubby.IsCollapsed, Cubby.TagLabel, Cubby.TagForItem
 
@@ -22,7 +23,7 @@ local function CreateGroupHeader()
         Cubby.OpenGroupMenu(self, self.tag)
     end)
 
-    local collapse = CreateIconButton(header, 16, "Einklappen")
+    local collapse = CreateIconButton(header, 16, L.COLLAPSE)
     collapse:SetPoint("LEFT", 0, 0)
     collapse:SetScript("OnClick", function(self)
         Cubby.ToggleCollapsed(HeaderTag(self))
@@ -31,7 +32,7 @@ local function CreateGroupHeader()
 
     header.hint = header:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     header.hint:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 2, -5)
-    header.hint:SetText("Items hierher ziehen")
+    header.hint:SetText(L.DRAG_ITEMS_HERE)
 
     local swatch = CreateFrame("Button", nil, header)
     swatch:SetSize(12, 12)
@@ -43,7 +44,7 @@ local function CreateGroupHeader()
     end)
     header.swatch = swatch
 
-    local protect = CreateIconButton(header, 16, "Verkaufsschutz")
+    local protect = CreateIconButton(header, 16, L.SELL_PROTECTION)
     protect:SetPoint("RIGHT", swatch, "LEFT", -6, 0)
     Cubby.SetButtonIconFile(protect, "Interface\\LFGFrame\\UI-LFG-ICON-LOCK")
     protect:SetScript("OnClick", function(self)
@@ -52,7 +53,7 @@ local function CreateGroupHeader()
     end)
     header.protect = protect
 
-    local moveDown = CreateIconButton(header, 14, "Bereich nach unten")
+    local moveDown = CreateIconButton(header, 14, L.MOVE_DOWN)
     moveDown:SetPoint("RIGHT", protect, "LEFT", -6, 0)
     SetButtonIcon(moveDown, "minimal-scrollbar-arrow-bottom", "v")
     moveDown:SetScript("OnClick", function(self)
@@ -60,7 +61,7 @@ local function CreateGroupHeader()
     end)
     header.moveDown = moveDown
 
-    local moveUp = CreateIconButton(header, 14, "Bereich nach oben")
+    local moveUp = CreateIconButton(header, 14, L.MOVE_UP)
     moveUp:SetPoint("RIGHT", moveDown, "LEFT", -2, 0)
     SetButtonIcon(moveUp, "minimal-scrollbar-arrow-top", "^")
     moveUp:SetScript("OnClick", function(self)
@@ -96,13 +97,13 @@ local function ShowGroupHeader(index, section, top, width)
     SetButtonIcon(header.collapse,
         collapsed and "ui-questtrackerbutton-secondary-expand" or "ui-questtrackerbutton-secondary-collapse",
         collapsed and "+" or "-")
-    header.collapse.tooltip = collapsed and "Aufklappen" or "Einklappen"
+    header.collapse.tooltip = collapsed and L.EXPAND or L.COLLAPSE
     SetButtonEnabled(header.collapse, state.searchText == "")
 
     header.swatch.color:SetColorTexture(tag.r, tag.g, tag.b, 1)
     header.protect.icon:SetDesaturated(not tag.noSell)
     header.protect.icon:SetAlpha(tag.noSell and 1 or 0.35)
-    header.protect.tooltip = tag.noSell and "Verkaufsschutz: an" or "Verkaufsschutz: aus"
+    header.protect.tooltip = tag.noSell and L.SELL_PROTECTION_ON or L.SELL_PROTECTION_OFF
     header:Show()
 end
 
@@ -143,7 +144,7 @@ local function UpdateGroupCounts()
         if header:IsShown() then
             local tag = header.tag
             -- Offene Bereiche brauchen das nicht: dort leuchtet das Item selbst.
-            local newMark = (hasNew[tag.id] and IsCollapsed(tag)) and " |cff66dd66neu|r" or ""
+            local newMark = (hasNew[tag.id] and IsCollapsed(tag)) and (" |cff66dd66%s|r"):format(L.NEW_ITEMS) or ""
             header.label:SetText(("%s |cff888888(%d)|r%s"):format(TagLabel(tag), counts[tag.id] or 0, newMark))
         end
     end

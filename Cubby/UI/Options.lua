@@ -1,13 +1,14 @@
 -- Einstellungsfenster (Zahnrad-Button): links neben dem Hauptfenster.
 local _, Cubby = ...
 local frame = Cubby.frame
+local L = Cubby.L
 
 local options = Cubby.CreatePanel("CubbyOptionsFrame")
 options:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", -4, 0)
 
 local optionsTitle = options:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 optionsTitle:SetPoint("TOPLEFT", Cubby.PAD, -Cubby.PAD)
-optionsTitle:SetText("Cubby-Optionen")
+optionsTitle:SetText(L.OPTIONS_TITLE)
 
 local optionsClose = CreateFrame("Button", nil, options, "UIPanelCloseButton")
 optionsClose:SetPoint("TOPRIGHT", 2, 2)
@@ -77,23 +78,23 @@ local function AddCheckbox(label, key)
     nextRowY = nextRowY - ROW_H
 end
 
-AddStepper("Spalten", function() return Cubby.db.columns end, function(delta)
+AddStepper(L.COLUMNS, function() return Cubby.db.columns end, function(delta)
     Cubby.db.columns = math.max(8, math.min(30, Cubby.db.columns + delta))
     Cubby.RequestLayout()
 end)
-AddStepper("Größe", function() return ("%.2f"):format(Cubby.db.scale) end, function(delta)
+AddStepper(L.SCALE, function() return ("%.2f"):format(Cubby.db.scale) end, function(delta)
     -- in Schritten von 0,05
     Cubby.SetWindowScale(math.floor((Cubby.db.scale + delta * 0.05) * 20 + 0.5) / 20)
 end)
-AddCheckbox("Itemlevel anzeigen", "showItemLevel")
-AddCheckbox("BoE markieren", "showBoE")
-AddCheckbox("Schlüsselbund anzeigen", "showKeyring")
-AddCheckbox("Fenster festsetzen", "locked")
+AddCheckbox(L.SHOW_ITEM_LEVEL, "showItemLevel")
+AddCheckbox(L.MARK_BOE, "showBoE")
+AddCheckbox(L.SHOW_KEYRING, "showKeyring")
+AddCheckbox(L.LOCK_WINDOW, "locked")
 
 local resetButton = CreateFrame("Button", nil, options, "UIPanelButtonTemplate")
 resetButton:SetSize(190, 22)
 resetButton:SetPoint("TOP", 0, nextRowY - 6)
-resetButton:SetText("Position zurücksetzen")
+resetButton:SetText(L.RESET_POSITION)
 resetButton:SetScript("OnClick", function()
     Cubby.ResetPosition()
 end)

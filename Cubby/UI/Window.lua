@@ -1,6 +1,7 @@
 -- Hauptfenster: Rahmen, Kopfzeile mit Buttons, Suchfeld, Fusszeile und Position.
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
 local PAD = Cubby.PAD
 local CreateIconButton, SetButtonIcon = Cubby.CreateIconButton, Cubby.SetButtonIcon
 
@@ -34,19 +35,19 @@ sortButton:SetScript("OnClick", function()
 end)
 sortButton:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText("Taschen sortieren")
+    GameTooltip:SetText(L.SORT_BAGS)
     GameTooltip:Show()
 end)
 sortButton:SetScript("OnLeave", GameTooltip_Hide)
 
-local groupsButton = CreateIconButton(frame, 20, "Gruppen")
+local groupsButton = CreateIconButton(frame, 20, L.GROUPS)
 groupsButton:SetPoint("RIGHT", sortButton, "LEFT", -4, 0)
 SetButtonIcon(groupsButton, "ui-questtrackerbutton-filter", "G")
 groupsButton:SetScript("OnClick", function(self)
     Cubby.OpenGroupsMenu(self)
 end)
 
-local optionsButton = CreateIconButton(frame, 20, "Optionen")
+local optionsButton = CreateIconButton(frame, 20, L.OPTIONS)
 optionsButton:SetPoint("RIGHT", groupsButton, "LEFT", -4, 0)
 SetButtonIcon(optionsButton, "questlog-icon-setting", "O")
 optionsButton:SetScript("OnClick", function()
@@ -90,7 +91,7 @@ function Cubby.UpdateFooter()
         free = free + (C_Container.GetContainerNumFreeSlots(bag) or 0)
         total = total + Cubby.NumSlots(bag)
     end
-    freeText:SetFormattedText("Frei: %d / %d", free, total)
+    freeText:SetFormattedText(L.FREE_SLOTS, free, total)
     moneyText:SetText(GetMoneyString(GetMoney(), true))
 end
 

@@ -2,6 +2,7 @@
 -- Benutzen, Ziehen, Verkaufen und Tooltips laufen ueber Blizzards Code.
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
 local TagForItem = Cubby.TagForItem
 local UpdateSellProtection = Cubby.UpdateSellProtection
 
@@ -174,7 +175,7 @@ local function GearTexts(info, bag, slot)
         end
     end
     if Cubby.db.showBoE and not info.isBound then
-        bindText = "BoE"
+        bindText = L.BOE
     end
     return levelText, bindText
 end
@@ -243,8 +244,8 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
     end
     local tag = TagForItem(data.id)
     if tag then
-        local suffix = (tag.noSell and " (Verkaufsschutz)" or "") .. (Cubby.IsAutoTagged(data.id) and " (automatisch)" or "")
-        tooltip:AddLine("Gruppe: " .. tag.name .. suffix, tag.r, tag.g, tag.b)
+        local suffix = (tag.noSell and L.TOOLTIP_SELL_PROTECTED or "") .. (Cubby.IsAutoTagged(data.id) and L.TOOLTIP_AUTOMATIC or "")
+        tooltip:AddLine(L.TOOLTIP_GROUP:format(tag.name) .. suffix, tag.r, tag.g, tag.b)
     end
 end)
 

@@ -2,6 +2,7 @@
 -- noch auf das Haendlerfenster ziehen, und Blizzards "Schrott verkaufen" wartet, solange welche da sind.
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
 local IsSellProtected = Cubby.IsSellProtected
 
 local function HasProtectedJunk()
@@ -30,7 +31,7 @@ local function UpdateBlizzardJunkButton()
 end
 
 local function NotifySellProtected()
-    UIErrorsFrame:AddMessage("Cubby: Dieses Item hat Verkaufsschutz.", 1, 0.3, 0.3)
+    UIErrorsFrame:AddMessage(L.SELL_PROTECTED_MESSAGE, 1, 0.3, 0.3)
 end
 
 -- Rechtsklick auf ein geschuetztes Item beim Haendler: verkauft wird nicht, wir sagen nur warum.
