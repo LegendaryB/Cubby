@@ -91,6 +91,7 @@ AddCheckbox(L.MARK_BOE, "showBoE")
 AddCheckbox(L.SHOW_KEYRING, "showKeyring")
 AddCheckbox(L.COMBINE_FREE_SLOTS, "combineFreeSlots")
 AddCheckbox(L.SHOW_VALUE, "showValue")
+AddCheckbox(L.SHOW_BAG_BAR, "showBagBar")
 AddCheckbox(L.LOCK_WINDOW, "locked")
 
 local resetButton = CreateFrame("Button", nil, options, "UIPanelButtonTemplate")

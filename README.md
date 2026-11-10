@@ -10,6 +10,7 @@ Bag addon for **WoW Forever**: all your bags in one window, organized into your 
 - **Sell protection** per group: protected items can't be sold to vendors
 - Sections can be collapsed and reordered, and their headers show how many items they hold
 - Item level and BoE labels, plus a marker for new items
+- **Bag bar** next to the search box: an icon per bag with its free slots; hovering one highlights that bag's slots
 - Options window for columns, scale and display settings
 
 The interface follows the client language: German on German clients, English on all others.
@@ -36,6 +37,9 @@ The [release workflow](.github/workflows/release.yml) checks that the tag matche
 | Drag an item onto a section | Assign the item to that group |
 | Drag an item onto the ungrouped section | Remove its group |
 | Alt + left-click an item | Pick a group from a list |
+| Hover a bag icon | Highlight the slots of that bag |
+| Drop a bag on a bag icon | Equip the bag in that slot |
+| Drag a bag icon | Pick the bag up |
 
 ## Project structure
 

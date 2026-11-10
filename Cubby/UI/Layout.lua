@@ -187,6 +187,7 @@ local function Refresh()
         Cubby.UpdateButton(button)
     end
     Cubby.UpdateFooter()
+    Cubby.UpdateBagBar()
     Cubby.UpdateGroupCounts()
     Cubby.UpdateBlizzardJunkButton()
     Cubby.UpdateDropZones()

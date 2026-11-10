@@ -61,6 +61,12 @@ local enUS = {
     LOCK_WINDOW = "Lock window",
     RESET_POSITION = "Reset position",
 
+    -- Bag bar
+    SHOW_BAG_BAR = "Show bag bar",
+    BACKPACK = "Backpack",
+    EMPTY_BAG_SLOT = "Empty bag slot",
+    EMPTY_REAGENT_SLOT = "Empty reagent bag slot",
+
     -- Errors
     FALLBACK_ERROR = "Error, switching back to the default bags:",
 }
@@ -118,6 +124,11 @@ local deDE = {
     VENDOR_VALUE = "Wert: %s",
     LOCK_WINDOW = "Fenster festsetzen",
     RESET_POSITION = "Position zurücksetzen",
+
+    SHOW_BAG_BAR = "Taschenleiste anzeigen",
+    BACKPACK = "Rucksack",
+    EMPTY_BAG_SLOT = "Leerer Taschenplatz",
+    EMPTY_REAGENT_SLOT = "Leerer Reagenzientaschenplatz",
 
     FALLBACK_ERROR = "Fehler, zurück zu den Standardtaschen:",
 }

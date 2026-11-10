@@ -62,12 +62,18 @@ local function CreateItemButton(bag, slot)
     bind:SetTextColor(0.4, 0.8, 1)
     button.cubbyBind = bind
 
-
     -- Number of free slots, if this empty slot stands for all of them
     local free = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalLarge")
     free:SetPoint("CENTER")
     free:Hide()
     button.cubbyFree = free
+
+    -- Dark veil while another bag is hovered in the bag bar
+    local dim = button:CreateTexture(nil, "OVERLAY", nil, 5)
+    dim:SetAllPoints()
+    dim:SetColorTexture(0, 0, 0, 0.65)
+    dim:Hide()
+    button.cubbyDim = dim
 
     local edges = {}
     for i, side in ipairs(TAG_EDGES) do
@@ -177,6 +183,34 @@ local function GearTexts(info, bag, slot)
     return levelText, bindText
 end
 
+-- A combined free slot stands for the free slots of every bag of its own kind (reagent or regular).
+local function StandsForBag(button, bag)
+    local reagent = Cubby.REAGENT_BAG
+    return (bag == reagent) == (button:GetBagID() == reagent)
+end
+
+-- While a bag is hovered in the bag bar, the slots of all other bags get a dark veil.
+local function ApplyBagHighlight(button)
+    local hovered = state.highlightBag
+    local dim = false
+    if hovered ~= nil then
+        if button.cubbyFreeCount then
+            dim = not (StandsForBag(button, hovered) and (C_Container.GetContainerNumFreeSlots(hovered) or 0) > 0)
+        else
+            dim = button:GetBagID() ~= hovered
+        end
+    end
+    button.cubbyDim:SetShown(dim)
+end
+
+-- nil removes the highlight
+local function SetBagHighlight(bag)
+    state.highlightBag = bag
+    for _, button in ipairs(Cubby.active) do
+        ApplyBagHighlight(button)
+    end
+end
+
 local function UpdateButton(button)
     local bag, slot = button:GetBagID(), button:GetID()
     local info = C_Container.GetContainerItemInfo(bag, slot)
@@ -231,6 +265,7 @@ local function UpdateButton(button)
         button.cubbyFree:Hide()
     end
 
+    ApplyBagHighlight(button)
     SetSearchMatch(button, MatchesSearch(link, itemID))
 end
 
@@ -258,3 +293,4 @@ Cubby.GetButton = GetButton
 Cubby.FindButton = FindButton
 Cubby.UpdateButton = UpdateButton
 Cubby.ApplySearch = ApplySearch
+Cubby.SetBagHighlight = SetBagHighlight

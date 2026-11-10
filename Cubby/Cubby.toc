@@ -18,6 +18,7 @@ SellProtection.lua
 UI\Window.lua
 UI\GroupMenus.lua
 UI\ItemButtons.lua
+UI\BagBar.lua
 UI\DropZones.lua
 UI\GroupHeaders.lua
 UI\Layout.lua

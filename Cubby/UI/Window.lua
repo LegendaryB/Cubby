@@ -62,6 +62,7 @@ searchBox:SetHeight(20)
 searchBox:SetPoint("TOPLEFT", PAD + 6, -30)
 searchBox:SetPoint("TOPRIGHT", -PAD, -30)
 searchBox:SetAutoFocus(false)
+Cubby.searchBox = searchBox
 searchBox:HookScript("OnTextChanged", function(self)
     local wasSearching = state.searchText ~= ""
     state.searchText = (self:GetText() or ""):lower()

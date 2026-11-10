@@ -15,6 +15,7 @@ Cubby.DEFAULTS = {
     showKeyring = true,
     combineFreeSlots = true,
     showValue = true,
+    showBagBar = true,
     locked = false,
 }
 
@@ -38,6 +39,7 @@ Cubby.state = {
     softLayout = false,    -- items changed: re-arrange as soon as the mouse is no longer over the items
     merchantOpen = false,
     failed = false,        -- after an error Blizzard's bags are used again
+    -- highlightBag: the bag hovered in the bag bar (nil = none); slots of other bags are dimmed
 }
 
 -- The item buttons currently shown, in display order; the layout fills the list.
