@@ -3,7 +3,7 @@
 ## Notes: All bags in one window - with search, groups, sell protection, item level and BoE labels.
 ## Notes-deDE: Alle Taschen in einem Fenster - mit Suche, Gruppen, Verkaufsschutz, Itemlevel und BoE-Markierung.
 ## Author: Daniel
-## Version: 1.2.0
+## Version: 1.2.1
 ## IconTexture: Interface\Icons\INV_Misc_Bag_08
 ## SavedVariables: CubbyDB
 
