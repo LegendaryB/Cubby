@@ -14,6 +14,7 @@ local function LoadSettings()
         end
     end
     db.lastError = nil
+    db.lastReparent = nil
     db.tags = db.tags or {}
     db.nextTagID = db.nextTagID or 1
     db.itemTags = db.itemTags or {}

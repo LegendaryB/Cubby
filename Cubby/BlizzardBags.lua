@@ -34,6 +34,26 @@ local function HideBlizzardBags()
     end
 end
 
+-- Blizzard re-parents its bag windows in several places (fullscreen panels, layout updates).
+-- Instead of chasing every caller, watch the frames themselves: whenever one is moved out of the
+-- hidden parent, put it back. The first caller is saved to db.lastReparent for diagnosis.
+local function GuardBlizzardBags()
+    local busy = false
+    for _, f in ipairs(GetBlizzardBagFrames()) do
+        hooksecurefunc(f, "SetParent", function(self, parent)
+            if busy or state.failed or parent == hiddenParent then
+                return
+            end
+            busy = true
+            if Cubby.db and not Cubby.db.lastReparent then
+                Cubby.db.lastReparent = (self:GetName() or "?") .. "\n" .. tostring(debugstack(3, 6, 0))
+            end
+            self:SetParent(hiddenParent)
+            busy = false
+        end)
+    end
+end
+
 local function RestoreBlizzardBags()
     for _, f in ipairs(GetBlizzardBagFrames()) do
         f:SetParent(UIParent)
@@ -107,6 +127,7 @@ local function InstallHooks()
         hooksecurefunc(f, "Show", RequestSync)
         hooksecurefunc(f, "Hide", RequestSync)
     end
+    GuardBlizzardBags()
 
     -- Cubby is one window for all bags, but Blizzard's bag buttons and bag keys toggle a single bag.
     -- While the window is open, a click on any bag therefore closes the whole window; otherwise it
