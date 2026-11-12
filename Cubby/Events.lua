@@ -1,6 +1,7 @@
 -- Load settings and react to game events. Loaded as the last file.
 local _, Cubby = ...
 local state = Cubby.state
+local L = Cubby.L
 local frame = Cubby.frame
 local ScheduleRefresh, SafeRefresh = Cubby.ScheduleRefresh, Cubby.SafeRefresh
 
@@ -15,6 +16,7 @@ local function LoadSettings()
     end
     db.lastError = nil
     db.lastReparent = nil
+    db.lastBlocked = nil
     db.tags = db.tags or {}
     db.nextTagID = db.nextTagID or 1
     db.itemTags = db.itemTags or {}
@@ -117,6 +119,18 @@ function events.INVENTORY_SEARCH_UPDATE()
         Cubby.ApplySearch()
     end
 end
+
+-- WoW blocked something Cubby (or code tainted by Cubby) tried to do: say which function, and keep
+-- the call stack in db.lastBlocked so the cause can be found.
+local function OnActionBlocked(_, addon, func)
+    if addon ~= "Cubby" then
+        return
+    end
+    Cubby.Print("|cffff4040" .. L.BLOCKED_ACTION .. "|r " .. tostring(func))
+    Cubby.db.lastBlocked = tostring(func) .. " | " .. tostring(debugstack(2, 8, 0))
+end
+events.ADDON_ACTION_FORBIDDEN = OnActionBlocked
+events.ADDON_ACTION_BLOCKED = OnActionBlocked
 
 frame:SetScript("OnEvent", function(_, event, ...)
     if not Cubby.db and event ~= "PLAYER_LOGIN" then

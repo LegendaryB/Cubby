@@ -69,6 +69,7 @@ local enUS = {
 
     -- Errors
     FALLBACK_ERROR = "Error, switching back to the default bags:",
+    BLOCKED_ACTION = "WoW blocked a protected function:",
 }
 
 local deDE = {
@@ -131,6 +132,7 @@ local deDE = {
     EMPTY_REAGENT_SLOT = "Leerer Reagenzientaschenplatz",
 
     FALLBACK_ERROR = "Fehler, zurück zu den Standardtaschen:",
+    BLOCKED_ACTION = "WoW hat eine geschützte Funktion geblockt:",
 }
 
 -- A missing German text falls back to English, a missing key shows its own name instead of breaking.
