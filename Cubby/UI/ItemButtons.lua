@@ -47,6 +47,12 @@ local TAG_EDGES = {
 local function CreateItemButton(bag, slot)
     local button = CreateFrame("ItemButton", "CubbyItem" .. bag .. "_" .. slot, GetHolder(bag), "ContainerFrameItemButtonTemplate")
     button:SetID(slot)
+    -- Blizzard's own way to tell a button its bag: through an attribute, so the value is set by
+    -- Blizzard's code. Without it the button reads the ID from its (Cubby-created) parent frame,
+    -- and Blizzard warns that this taints all interaction with the items ("action blocked").
+    if button.SetBagID then
+        button:SetBagID(bag)
+    end
     button:SetSize(Cubby.SLOT, Cubby.SLOT)
 
     local bg = button:CreateTexture(nil, "BACKGROUND", nil, -7)
