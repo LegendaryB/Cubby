@@ -24,6 +24,7 @@ UI\DropZones.lua
 UI\GroupHeaders.lua
 UI\Layout.lua
 UI\Options.lua
+UI\RuleEditor.lua
 
 # Blizzard integration
 Sorting.lua

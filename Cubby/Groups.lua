@@ -36,6 +36,9 @@ local function TagsChanged()
     ClearRuleCache()
     Cubby.RequestLayout()
     Cubby.UpdateBlizzardJunkButton()
+    if Cubby.RefreshRuleEditor then
+        Cubby.RefreshRuleEditor()
+    end
 end
 
 ---------------------------------------------------------------------------
@@ -420,9 +423,7 @@ Cubby.ToggleSellProtection = ToggleSellProtection
 Cubby.ToggleSection = ToggleSection
 Cubby.ToggleCollapsed = ToggleCollapsed
 Cubby.ToggleRule = ToggleRule
-Cubby.ClearRuleCache = ClearRuleCache
 Cubby.ItemDataArrived = ItemDataArrived
-Cubby.RuleOf = RuleOf
 Cubby.AddCondition = AddCondition
 Cubby.RemoveCondition = RemoveCondition
 Cubby.ToggleConditionNegated = ToggleConditionNegated

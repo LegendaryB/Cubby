@@ -218,7 +218,6 @@ end
 
 Cubby.QUALITIES = QUALITIES
 Cubby.EQUIP_SLOTS = EQUIP_SLOTS
-Cubby.MatchesCondition = MatchesCondition
 Cubby.MatchesRule = MatchesRule
 Cubby.DescribeCondition = Describe
 Cubby.SlotText = SlotText

@@ -6,7 +6,8 @@ Bag addon for **WoW Forever**: all your bags in one window, organized into your 
 
 - All bags in a single window, with search that uses the game's own item search (the one the default bags use) and also finds group names
 - **Groups** with their own color, optionally shown as a separate section in the window
-- **Auto-sort rules:** assign whole item categories (e.g. "Trade Goods: Cloth") to a group
+- **Auto-sort rules:** assign whole item categories (e.g. "Trade Goods: Cloth") or qualities to a group
+- **Rule editor** (group menu, "Edit rules..."): build conditions from quality, item level, equipment slot, item type, binding, name and vendor value, each optionally negated, combined with "all" or "any". If several groups match an item, the upper section wins; items you assign by hand always win
 - **Sell protection** per group: protected items can't be sold to vendors
 - Sections can be collapsed and reordered, and their headers show how many items they hold
 - Item level and BoE labels, plus a marker for new items
