@@ -46,7 +46,7 @@ Cubby.state = {
 Cubby.active = {}
 
 function Cubby.Print(msg)
-    print("|cff33ff99Cubby|r: " .. msg)
+    print(msg)
 end
 
 function Cubby.ErrorHandler(err)
