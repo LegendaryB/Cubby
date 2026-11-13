@@ -16,9 +16,32 @@ local function PaintDropZone(zone, alpha)
     end
 end
 
+-- Is the item on the cursor from one of the bags this window shows? An item from the bank or
+-- anywhere else must not be caught here: it has to go through Blizzard's own slot code, which moves
+-- it into the bags. A zone would only clear the cursor and leave the item where it was.
+local function CursorHasBagItem()
+    if GetCursorInfo() ~= "item" then
+        return false
+    end
+    local location = C_Cursor.GetCursorItem()
+    local bag = location and location:GetBagAndSlot()
+    if bag == nil then
+        return false
+    end
+    if bag == Cubby.KEYRING_BAG or bag == Cubby.REAGENT_BAG then
+        return true
+    end
+    for _, mainBag in ipairs(Cubby.MainBags()) do
+        if bag == mainBag then
+            return true
+        end
+    end
+    return false
+end
+
 local function DropOnZone(zone)
     local cursorType, itemID = GetCursorInfo()
-    if cursorType ~= "item" or not zone.tag then
+    if cursorType ~= "item" or not zone.tag or not CursorHasBagItem() then
         return
     end
     ClearCursor()
@@ -78,15 +101,7 @@ local function ReleaseDropZones(firstUnused)
     end
 end
 
-local function CursorHasBagItem()
-    if GetCursorInfo() ~= "item" then
-        return false
-    end
-    local location = C_Cursor.GetCursorItem()
-    return location ~= nil and location:GetBagAndSlot() ~= nil
-end
-
--- Visible only while a bag item is on the cursor
+-- Visible only while an item from the bags is on the cursor
 local function UpdateDropZones()
     local show = CursorHasBagItem()
     local _, cursorItemID = GetCursorInfo()
