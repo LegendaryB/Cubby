@@ -84,6 +84,8 @@ local function ApplyValue(data, text)
         end
         if data.kind == "gold" then
             cond = { type = "price", op = data.op, value = math.floor(number * 10000 + 0.5) }
+        elseif data.kind == "level" then
+            cond = { type = "minlevel", op = data.op, value = math.floor(number + 0.5) }
         else
             cond = { type = "ilvl", op = data.op, value = math.floor(number + 0.5) }
         end
@@ -149,8 +151,47 @@ local function AddSlotEntries(menu)
     end
 end
 
--- Item classes and categories that are in the bags right now (or already used by a rule)
-local function AddTypeEntries(menu)
+-- Every item class with its subclasses, as the game lists them
+local MAX_CLASS, MAX_SUBCLASS = 20, 30
+
+local function AllItemTypes()
+    local list = {}
+    for classID = 0, MAX_CLASS do
+        local className = GetItemClassInfo(classID)
+        if className and className ~= "" then
+            local subs = {}
+            for subID = 0, MAX_SUBCLASS do
+                local subName = GetItemSubClassInfo(classID, subID)
+                if subName and subName ~= "" then
+                    subs[#subs + 1] = { category = classID * 1000 + subID, label = className .. ": " .. subName, name = subName }
+                end
+            end
+            list[#list + 1] = { classID = classID, name = className, subs = subs }
+        end
+    end
+    return list
+end
+
+local function AddFullTypeEntries(menu)
+    for _, class in ipairs(AllItemTypes()) do
+        local submenu = menu:CreateButton(class.name)
+        submenu:CreateButton(L.ALL_OF_TYPE:format(class.name), function()
+            AddCondition({ type = "class", value = class.classID, label = class.name })
+        end)
+        if #class.subs > 0 then
+            submenu:CreateDivider()
+        end
+        for _, sub in ipairs(class.subs) do
+            submenu:CreateButton(sub.name, function()
+                AddCondition({ type = "category", value = sub.category, label = sub.label })
+            end)
+        end
+    end
+end
+
+-- Fallback for clients without the class lists: the item classes and categories that are in the
+-- bags right now (or already used by a rule)
+local function AddBagTypeEntries(menu)
     local categories = Cubby.RuleCategories()
     if #categories == 0 then
         menu:CreateTitle(L.NO_ITEMS_IN_BAGS)
@@ -181,19 +222,27 @@ local function AddTypeEntries(menu)
     end
 end
 
+local function AddTypeEntries(menu)
+    if GetItemClassInfo and GetItemSubClassInfo then
+        AddFullTypeEntries(menu)
+    else
+        AddBagTypeEntries(menu)
+    end
+end
+
 local function OpenAddMenu(owner)
     MenuUtil.CreateContextMenu(owner, function(_, root)
         AddQualityEntries(root:CreateButton(L.COND_MENU_QUALITY))
         AddValueEntries(root:CreateButton(L.COND_MENU_ILVL), L.PROMPT_ILVL, "ilvl")
+        AddValueEntries(root:CreateButton(L.COND_MENU_LEVEL), L.PROMPT_LEVEL, "level")
         AddSlotEntries(root:CreateButton(L.COND_MENU_SLOT))
         AddTypeEntries(root:CreateButton(L.COND_MENU_TYPE))
         local bind = root:CreateButton(L.COND_MENU_BIND)
-        bind:CreateButton(L.COND_BOE, function()
-            AddCondition({ type = "bind", value = "boe" })
-        end)
-        bind:CreateButton(L.COND_BOP, function()
-            AddCondition({ type = "bind", value = "bop" })
-        end)
+        for _, kind in ipairs(Cubby.BIND_KINDS) do
+            bind:CreateButton(kind[3], function()
+                AddCondition({ type = "bind", value = kind[1] })
+            end)
+        end
         root:CreateButton(L.COND_MENU_NAME, function()
             AskValue(L.PROMPT_NAME, "name")
         end)

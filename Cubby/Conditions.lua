@@ -5,7 +5,8 @@
 --   slot      value = equipment slot ("INVTYPE_HEAD", ...)
 --   class     value = item class ID, label = its name        (e.g. all Consumables)
 --   category  value = class * 1000 + subclass, label = name  (e.g. Trade Goods: Cloth)
---   bind      value = "boe" or "bop"
+--   bind      value = "boe", "bop", "bou" (when used), "quest" or "none"
+--   minlevel  op and value: the level the item requires
 --   name      value = text the item name contains (ignoring case)
 --   price     op and value in copper: vendor value of one item
 -- neg = true turns the result around ("NOT ...").
@@ -19,16 +20,25 @@ local QUALITIES = { 0, 1, 2, 3, 4, 5 }
 local EQUIP_SLOTS = {
     "INVTYPE_HEAD", "INVTYPE_NECK", "INVTYPE_SHOULDER", "INVTYPE_CLOAK", "INVTYPE_CHEST", "INVTYPE_WRIST",
     "INVTYPE_HAND", "INVTYPE_WAIST", "INVTYPE_LEGS", "INVTYPE_FEET", "INVTYPE_FINGER", "INVTYPE_TRINKET",
-    "INVTYPE_WEAPON", "INVTYPE_2HWEAPON", "INVTYPE_SHIELD", "INVTYPE_HOLDABLE", "INVTYPE_RANGED",
+    "INVTYPE_WEAPON", "INVTYPE_WEAPONMAINHAND", "INVTYPE_WEAPONOFFHAND", "INVTYPE_2HWEAPON", "INVTYPE_SHIELD",
+    "INVTYPE_HOLDABLE", "INVTYPE_RANGED", "INVTYPE_THROWN", "INVTYPE_RELIC", "INVTYPE_AMMO", "INVTYPE_QUIVER",
+    "INVTYPE_BAG", "INVTYPE_BODY", "INVTYPE_TABARD",
 }
 local SAME_SLOT = {
     INVTYPE_ROBE = "INVTYPE_CHEST",
     INVTYPE_RANGEDRIGHT = "INVTYPE_RANGED",
-    INVTYPE_WEAPONMAINHAND = "INVTYPE_WEAPON",
-    INVTYPE_WEAPONOFFHAND = "INVTYPE_WEAPON",
 }
 
-local BIND_TYPES = { boe = 2, bop = 1 } -- values of the "bindType" Blizzard reports
+-- Binding kinds in the order the editor lists them, with the "bindType" Blizzard reports for each
+local BIND_KINDS = {
+    { "boe", 2, L.COND_BOE }, { "bop", 1, L.COND_BOP }, { "bou", 3, L.COND_BOU },
+    { "quest", 4, L.COND_BIND_QUEST }, { "none", 0, L.COND_BIND_NONE },
+}
+local BIND_TYPES, BIND_TEXTS = {}, {}
+for _, kind in ipairs(BIND_KINDS) do
+    BIND_TYPES[kind[1]] = kind[2]
+    BIND_TEXTS[kind[1]] = kind[3]
+end
 
 local function IsGear(equipLoc)
     return equipLoc ~= nil and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP_IGNORE"
@@ -105,6 +115,14 @@ function matchers.bind(cond, itemID)
         return nil
     end
     return bindType == BIND_TYPES[cond.value]
+end
+
+function matchers.minlevel(cond, itemID)
+    local minLevel = select(5, C_Item.GetItemInfo(itemID))
+    if minLevel == nil then
+        return nil
+    end
+    return Compare(cond.op, minLevel, cond.value)
 end
 
 function matchers.name(cond, itemID)
@@ -202,7 +220,9 @@ local function Describe(cond)
     elseif t == "class" or t == "category" then
         text = L.COND_TYPE:format(cond.label or tostring(cond.value))
     elseif t == "bind" then
-        text = cond.value == "boe" and L.COND_BOE or L.COND_BOP
+        text = BIND_TEXTS[cond.value] or L.COND_BOP
+    elseif t == "minlevel" then
+        text = L.COND_REQLEVEL:format(OperatorText(cond.op), tostring(cond.value or 0))
     elseif t == "name" then
         text = L.COND_NAME:format(tostring(cond.value))
     elseif t == "price" then
@@ -218,6 +238,7 @@ end
 
 Cubby.QUALITIES = QUALITIES
 Cubby.EQUIP_SLOTS = EQUIP_SLOTS
+Cubby.BIND_KINDS = BIND_KINDS
 Cubby.MatchesRule = MatchesRule
 Cubby.DescribeCondition = Describe
 Cubby.SlotText = SlotText
