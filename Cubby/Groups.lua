@@ -157,9 +157,37 @@ local function TagForItem(itemID)
     return RuleTagForItem(itemID)
 end
 
--- Does the group come only from a rule, i.e. without a manual assignment?
-local function IsAutoTagged(itemID)
-    return Cubby.db.itemTags[itemID] == nil
+-- Why the item is in its group, as text for the tooltip: "Assigned by hand" or the rule behind it.
+-- Follows the same order as TagForItem.
+local function TagReason(itemID)
+    local db = Cubby.db
+    local tagID = db.itemTags[itemID]
+    if tagID == false then
+        return nil
+    elseif tagID then
+        return db.tags[tagID] and L.REASON_MANUAL or nil
+    end
+    local conditionTag = ConditionTagForItem(itemID)
+    if conditionTag then
+        local parts = {}
+        for _, cond in ipairs(conditionTag.rule.conds) do
+            if Cubby.MatchesCondition(cond, itemID) then
+                parts[#parts + 1] = Cubby.DescribeCondition(cond)
+            end
+        end
+        return L.REASON_RULE:format(table.concat(parts, ", "))
+    end
+    local category = ItemCategory(itemID)
+    local rule = category and db.rules[category]
+    if rule and db.tags[rule.tagID] then
+        return L.REASON_RULE:format(rule.name)
+    end
+    local quality = C_Item.GetItemQualityByID(itemID)
+    rule = quality and db.rules[QualityKey(quality)]
+    if rule and db.tags[rule.tagID] then
+        return L.REASON_RULE:format(rule.name)
+    end
+    return nil
 end
 
 local function IsSellProtected(itemID)
@@ -369,6 +397,18 @@ local function SetRuleMatch(tag, match)
     TagsChanged()
 end
 
+-- Turns a suggestion from ConditionsForItem into a rule of the group. The item itself must not
+-- keep a manual assignment, otherwise the rule would not apply to it.
+local function AddRuleFromItem(tag, cond, itemID)
+    Cubby.db.itemTags[itemID] = nil
+    local copy = {}
+    for key, value in pairs(cond) do
+        copy[key] = value
+    end
+    AddCondition(tag, copy)
+    Cubby.OpenRuleEditor(tag)
+end
+
 -- How many item slots in the bags the group's own conditions match (ignoring other groups)
 local function RuleMatchCount(tag)
     local rule = tag.rule
@@ -404,7 +444,8 @@ end
 
 Cubby.TagsChanged = TagsChanged
 Cubby.TagForItem = TagForItem
-Cubby.IsAutoTagged = IsAutoTagged
+Cubby.TagReason = TagReason
+Cubby.AddRuleFromItem = AddRuleFromItem
 Cubby.IsSellProtected = IsSellProtected
 Cubby.TagLabel = TagLabel
 Cubby.SortedTags = SortedTags

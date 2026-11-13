@@ -35,7 +35,9 @@ local function ApplyTagName(data, text)
         return
     end
     local tag = Cubby.CreateTag(name)
-    if data.itemID then
+    if data.cond then
+        Cubby.AddRuleFromItem(tag, data.cond, data.itemID)
+    elseif data.itemID then
         Cubby.SetItemTag(data.itemID, tag.id)
     else
         TagsChanged()
@@ -91,9 +93,10 @@ StaticPopupDialogs.CUBBY_SELL_SECTION = {
     whileDead = 1,
 }
 
--- itemID is optional: the new group is assigned this item right away.
-local function AskNewGroupName(itemID)
-    StaticPopup_Show("CUBBY_TAG_NAME", L.NEW_GROUP_PROMPT, nil, { itemID = itemID })
+-- itemID is optional: the new group is assigned this item right away. With cond (a suggestion
+-- from the item) the new group gets that rule instead.
+local function AskNewGroupName(itemID, cond)
+    StaticPopup_Show("CUBBY_TAG_NAME", L.NEW_GROUP_PROMPT, nil, { itemID = itemID, cond = cond })
 end
 
 -- Sell button in the header: ask first, with count and value
@@ -209,6 +212,23 @@ local function OpenItemMenu(owner, itemID)
         root:CreateButton(L.NEW_GROUP, function()
             AskNewGroupName(itemID)
         end)
+
+        -- "Rule from this item": pick what describes the item, then the group that gets the rule
+        local suggestions = Cubby.ConditionsForItem(itemID)
+        if #suggestions > 0 then
+            local ruleMenu = root:CreateButton(L.RULE_FROM_ITEM)
+            for _, cond in ipairs(suggestions) do
+                local entry = ruleMenu:CreateButton(Cubby.DescribeCondition(cond))
+                for _, tag in ipairs(SortedTags()) do
+                    entry:CreateButton(TagLabel(tag), function()
+                        Cubby.AddRuleFromItem(tag, cond, itemID)
+                    end)
+                end
+                entry:CreateButton(L.NEW_GROUP, function()
+                    AskNewGroupName(itemID, cond)
+                end)
+            end
+        end
     end)
 end
 

@@ -298,8 +298,11 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
     end
     local tag = TagForItem(data.id)
     if tag then
-        local suffix = (tag.noSell and L.TOOLTIP_SELL_PROTECTED or "") .. (Cubby.IsAutoTagged(data.id) and L.TOOLTIP_AUTOMATIC or "")
-        tooltip:AddLine(L.TOOLTIP_GROUP:format(tag.name) .. suffix, tag.r, tag.g, tag.b)
+        tooltip:AddLine(L.TOOLTIP_GROUP:format(tag.name) .. (tag.noSell and L.TOOLTIP_SELL_PROTECTED or ""), tag.r, tag.g, tag.b)
+        local reason = Cubby.TagReason(data.id)
+        if reason then
+            tooltip:AddLine(reason, 0.6, 0.6, 0.6)
+        end
     end
 end)
 

@@ -71,7 +71,9 @@ local enUS = {
     -- Item tooltip and buttons
     TOOLTIP_GROUP = "Group: %s",
     TOOLTIP_SELL_PROTECTED = " (sell protection)",
-    TOOLTIP_AUTOMATIC = " (automatic)",
+    REASON_MANUAL = "Assigned by hand",
+    REASON_RULE = "Rule: %s",
+    RULE_FROM_ITEM = "Rule from this item",
     BOE = "BoE",
     SELL_PROTECTED_MESSAGE = "Cubby: This item is protected from selling.",
 
@@ -180,7 +182,9 @@ local deDE = {
 
     TOOLTIP_GROUP = "Gruppe: %s",
     TOOLTIP_SELL_PROTECTED = " (Verkaufsschutz)",
-    TOOLTIP_AUTOMATIC = " (automatisch)",
+    REASON_MANUAL = "Von Hand zugewiesen",
+    REASON_RULE = "Regel: %s",
+    RULE_FROM_ITEM = "Regel aus diesem Item",
     BOE = "BoE",
     SELL_PROTECTED_MESSAGE = "Cubby: Dieses Item hat Verkaufsschutz.",
 

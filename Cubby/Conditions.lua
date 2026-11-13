@@ -182,6 +182,52 @@ local function MatchesRule(rule, itemID)
 end
 
 ---------------------------------------------------------------------------
+-- Suggestions for an item
+---------------------------------------------------------------------------
+local BIND_BY_TYPE = {}
+for _, kind in ipairs(BIND_KINDS) do
+    BIND_BY_TYPE[kind[2]] = kind[1]
+end
+
+-- Conditions that describe this item, to turn one of them into a rule. Only what the game
+-- already knows about the item is offered.
+local function ConditionsForItem(itemID)
+    local list = {}
+    local _, itemType, subType, equipLoc, _, classID, subClassID = C_Item.GetItemInfoInstant(itemID)
+    if not classID then
+        return list
+    end
+    local label = itemType or "?"
+    if subType and subType ~= "" and subType ~= itemType then
+        label = label .. ": " .. subType
+    end
+    list[#list + 1] = { type = "category", value = classID * 1000 + (subClassID or 0), label = label }
+    list[#list + 1] = { type = "class", value = classID, label = itemType or "?" }
+
+    local quality = C_Item.GetItemQualityByID(itemID)
+    if quality then
+        list[#list + 1] = { type = "quality", op = ">=", value = quality }
+        list[#list + 1] = { type = "quality", op = "=", value = quality }
+    end
+    if IsGear(equipLoc) then
+        list[#list + 1] = { type = "slot", value = SAME_SLOT[equipLoc] or equipLoc }
+        local ilvl = select(4, C_Item.GetItemInfo(itemID))
+        if ilvl and ilvl > 0 then
+            list[#list + 1] = { type = "ilvl", op = ">=", value = ilvl }
+        end
+    end
+    local bind = BIND_BY_TYPE[select(14, C_Item.GetItemInfo(itemID))]
+    if bind and bind ~= "none" then
+        list[#list + 1] = { type = "bind", value = bind }
+    end
+    local name = C_Item.GetItemInfo(itemID)
+    if name and name ~= "" then
+        list[#list + 1] = { type = "name", value = name }
+    end
+    return list
+end
+
+---------------------------------------------------------------------------
 -- Texts
 ---------------------------------------------------------------------------
 local function OperatorText(op)
@@ -238,6 +284,8 @@ end
 
 Cubby.QUALITIES = QUALITIES
 Cubby.EQUIP_SLOTS = EQUIP_SLOTS
+Cubby.MatchesCondition = MatchesCondition
+Cubby.ConditionsForItem = ConditionsForItem
 Cubby.BIND_KINDS = BIND_KINDS
 Cubby.MatchesRule = MatchesRule
 Cubby.DescribeCondition = Describe
