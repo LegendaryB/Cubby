@@ -120,7 +120,9 @@ events.QUEST_REMOVED = RefreshSoon
 events.BAG_NEW_ITEMS_UPDATED = RefreshSoon
 -- Item data has been loaded: needed for the vendor value, and rules may have been waiting for it
 function events.GET_ITEM_INFO_RECEIVED()
-    if Cubby.ItemDataArrived() then
+    local rulesWaited = Cubby.ItemDataArrived()
+    local orderWaited = Cubby.OrderDataArrived()
+    if rulesWaited or orderWaited then
         state.softLayout = true
     end
     ScheduleRefresh()

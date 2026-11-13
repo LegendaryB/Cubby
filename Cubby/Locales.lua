@@ -5,6 +5,13 @@ local _, Cubby = ...
 local enUS = {
     -- Main window
     SORT_BAGS = "Sort bags",
+    SORT_ITEMS = "Order items by",
+    ORDER_BAG = "Bag order",
+    ORDER_QUALITY = "Quality",
+    ORDER_NAME = "Name",
+    ORDER_ILVL = "Item level",
+    ORDER_TYPE = "Type",
+    ORDER_VALUE = "Vendor value",
     SORT_IGNORED = "Ignored when sorting - right-click to include",
     SORT_IGNORE_HINT = "Right-click: ignore when sorting",
     GROUPS = "Groups",
@@ -118,6 +125,13 @@ local enUS = {
 
 local deDE = {
     SORT_BAGS = "Taschen sortieren",
+    SORT_ITEMS = "Items ordnen nach",
+    ORDER_BAG = "Taschenreihenfolge",
+    ORDER_QUALITY = "Qualität",
+    ORDER_NAME = "Name",
+    ORDER_ILVL = "Itemlevel",
+    ORDER_TYPE = "Typ",
+    ORDER_VALUE = "Verkaufswert",
     SORT_IGNORED = "Wird beim Sortieren ignoriert - Rechtsklick zum Einbeziehen",
     SORT_IGNORE_HINT = "Rechtsklick: beim Sortieren ignorieren",
     GROUPS = "Gruppen",

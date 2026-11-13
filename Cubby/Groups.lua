@@ -2,7 +2,8 @@
 -- Internally a group is called "tag"; the game shows "group" everywhere.
 --
 -- In CubbyDB:
---   tags[id]         = { id, name, r, g, b, noSell, section, order, collapsed }
+--   tags[id]         = { id, name, r, g, b, noSell, section, order, collapsed, sortBy }
+--                      sortBy: how the items inside the section are ordered, see ItemOrder.lua
 --   itemTags[itemID] = group ID, or false for "deliberately no group" (also beats rules)
 --   rules[category]  = { tagID, name }: all items of this category belong to the group automatically.
 --                      category is a number (item class) or "q0".."q5" (quality).
@@ -349,6 +350,12 @@ local function ToggleSection(tag)
     TagsChanged()
 end
 
+-- mode: one of ItemOrder.lua's modes, nil for the order of the bags
+local function SetSortBy(tag, mode)
+    tag.sortBy = mode
+    TagsChanged()
+end
+
 local function ToggleCollapsed(tag)
     tag.collapsed = not tag.collapsed
     TagsChanged()
@@ -463,6 +470,7 @@ Cubby.DeleteTag = DeleteTag
 Cubby.ToggleSellProtection = ToggleSellProtection
 Cubby.ToggleSection = ToggleSection
 Cubby.ToggleCollapsed = ToggleCollapsed
+Cubby.SetSortBy = SetSortBy
 Cubby.ToggleRule = ToggleRule
 Cubby.ItemDataArrived = ItemDataArrived
 Cubby.AddCondition = AddCondition

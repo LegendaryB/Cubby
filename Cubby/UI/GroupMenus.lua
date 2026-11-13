@@ -154,6 +154,14 @@ local function AddTagEditEntries(description, tag)
     end, function()
         Cubby.ToggleSection(tag)
     end)
+    local orderMenu = description:CreateButton(L.SORT_ITEMS)
+    for _, mode in ipairs(Cubby.ORDER_MODES) do
+        orderMenu:CreateRadio(mode[2], function(key)
+            return (tag.sortBy or "bag") == key
+        end, function(key)
+            Cubby.SetSortBy(tag, key ~= "bag" and key or nil)
+        end, mode[1])
+    end
     description:CreateButton(L.EDIT_RULES, function()
         Cubby.OpenRuleEditor(tag)
     end)

@@ -66,7 +66,9 @@ local function GetSections()
     end
 
     for _, tag in ipairs(Cubby.AreaTagsInOrder()) do -- show even when empty, so items can be dragged in
-        sections[#sections + 1] = { slots = tagSlots[tag.id] or {}, tag = tag }
+        local slots = tagSlots[tag.id] or {}
+        Cubby.OrderSlots(slots, tag.sortBy)
+        sections[#sections + 1] = { slots = slots, tag = tag }
     end
 
     if reagentSlots and #reagentSlots > 0 then
