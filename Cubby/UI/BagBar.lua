@@ -1,6 +1,7 @@
 -- Bag bar: one small icon per bag, right of the search box. Hovering an icon highlights that bag's
 -- slots, dropping a bag on an icon equips it and dragging an icon picks the bag up, like Blizzard's
 -- own bag bar does (it uses the same plain API calls, no protected frames are touched).
+-- A right-click toggles "ignore when sorting": the sort button leaves such a bag untouched.
 local _, Cubby = ...
 local L = Cubby.L
 local frame, PAD = Cubby.frame, Cubby.PAD
@@ -41,6 +42,28 @@ local function PutCursorItemIn(button)
     end
 end
 
+-- "Ignore when cleaning up": the sort button skips this bag (the backpack has its own setting)
+local function IsSortIgnored(bagID)
+    if bagID == 0 then
+        return C_Container.GetBackpackAutosortDisabled ~= nil and C_Container.GetBackpackAutosortDisabled() == true
+    end
+    local flag = Enum.BagSlotFlags and Enum.BagSlotFlags.DisableAutoSort
+    return flag ~= nil and C_Container.GetBagSlotFlag ~= nil and C_Container.GetBagSlotFlag(bagID, flag) == true
+end
+
+local function SetSortIgnored(bagID, value)
+    if bagID == 0 then
+        if C_Container.SetBackpackAutosortDisabled then
+            C_Container.SetBackpackAutosortDisabled(value)
+        end
+        return
+    end
+    local flag = Enum.BagSlotFlags and Enum.BagSlotFlags.DisableAutoSort
+    if flag and C_Container.SetBagSlotFlag then
+        C_Container.SetBagSlotFlag(bagID, flag, value)
+    end
+end
+
 local function ShowTooltip(button)
     local bagID = button.bagID
     GameTooltip:SetOwner(button, "ANCHOR_BOTTOM")
@@ -56,6 +79,11 @@ local function ShowTooltip(button)
     local total = Cubby.NumSlots(bagID)
     if total > 0 then
         GameTooltip:AddLine(L.FREE_SLOTS:format(C_Container.GetContainerNumFreeSlots(bagID) or 0, total))
+        if IsSortIgnored(bagID) then
+            GameTooltip:AddLine(L.SORT_IGNORED, 1, 0.4, 0.4)
+        else
+            GameTooltip:AddLine(L.SORT_IGNORE_HINT, 0.6, 0.6, 0.6)
+        end
     end
     GameTooltip:Show()
 end
@@ -84,7 +112,14 @@ local function CreateBagButton(bagID, previous)
     button.free:SetPoint("BOTTOMRIGHT", -1, 2)
 
     button:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
-    button:RegisterForClicks("LeftButtonUp")
+    -- Red cross: this bag is skipped when sorting
+    button.ignored = button:CreateTexture(nil, "OVERLAY")
+    button.ignored:SetSize(12, 12)
+    button.ignored:SetPoint("TOPRIGHT", 1, 1)
+    button.ignored:SetTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
+    button.ignored:Hide()
+
+    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:RegisterForDrag("LeftButton")
     button:SetScript("OnEnter", function(self)
         ShowTooltip(self)
@@ -94,7 +129,17 @@ local function CreateBagButton(bagID, previous)
         GameTooltip_Hide()
         Cubby.SetBagHighlight(nil)
     end)
-    button:SetScript("OnClick", PutCursorItemIn)
+    button:SetScript("OnClick", function(self, mouseButton)
+        if CursorHasItem() then
+            PutCursorItemIn(self)
+        elseif mouseButton == "RightButton" and Cubby.NumSlots(self.bagID) > 0 then
+            SetSortIgnored(self.bagID, not IsSortIgnored(self.bagID))
+            Cubby.UpdateBagBar()
+            if GameTooltip:IsOwned(self) then
+                ShowTooltip(self)
+            end
+        end
+    end)
     button:SetScript("OnReceiveDrag", PutCursorItemIn)
     button:SetScript("OnDragStart", function(self)
         if self.inventoryID then
@@ -143,6 +188,7 @@ local function UpdateBagButton(button)
     else
         button.free:SetText("")
     end
+    button.ignored:SetShown(Cubby.NumSlots(bagID) > 0 and IsSortIgnored(bagID))
 end
 
 function Cubby.UpdateBagBar()

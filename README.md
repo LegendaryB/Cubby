@@ -10,7 +10,7 @@ Bag addon for **WoW Forever**: all your bags in one window, organized into your 
 - **Sell protection** per group: protected items can't be sold to vendors
 - Sections can be collapsed and reordered, and their headers show how many items they hold
 - Item level and BoE labels, plus a marker for new items
-- **Bag bar** next to the search box: an icon per bag with its free slots; hovering one highlights that bag's slots
+- **Bag bar** next to the search box: an icon per bag with its free slots; hovering one highlights that bag's slots, right-click excludes it from sorting (marked with a red cross)
 - Options window for columns, scale and display settings
 
 The interface follows the client language: German on German clients, English on all others.

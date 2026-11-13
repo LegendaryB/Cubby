@@ -73,6 +73,13 @@ function events.BAG_UPDATE_DELAYED()
     ScheduleRefresh()
 end
 
+-- A bag's "ignore when sorting" setting changed (also by Blizzard's own menu)
+function events.BAG_SLOT_FLAGS_UPDATED()
+    if frame:IsShown() then
+        Cubby.UpdateBagBar()
+    end
+end
+
 function events.PLAYER_MONEY()
     if frame:IsShown() then
         Cubby.UpdateFooter()

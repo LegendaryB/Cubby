@@ -5,6 +5,8 @@ local _, Cubby = ...
 local enUS = {
     -- Main window
     SORT_BAGS = "Sort bags",
+    SORT_IGNORED = "Ignored when sorting - right-click to include",
+    SORT_IGNORE_HINT = "Right-click: ignore when sorting",
     GROUPS = "Groups",
     OPTIONS = "Options",
     FREE_SLOTS = "Free: %d / %d",
@@ -74,6 +76,8 @@ local enUS = {
 
 local deDE = {
     SORT_BAGS = "Taschen sortieren",
+    SORT_IGNORED = "Wird beim Sortieren ignoriert - Rechtsklick zum Einbeziehen",
+    SORT_IGNORE_HINT = "Rechtsklick: beim Sortieren ignorieren",
     GROUPS = "Gruppen",
     OPTIONS = "Optionen",
     FREE_SLOTS = "Frei: %d / %d",
