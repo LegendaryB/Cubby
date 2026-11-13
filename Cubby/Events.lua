@@ -118,7 +118,13 @@ end
 events.QUEST_ACCEPTED = RefreshSoon
 events.QUEST_REMOVED = RefreshSoon
 events.BAG_NEW_ITEMS_UPDATED = RefreshSoon
-events.GET_ITEM_INFO_RECEIVED = RefreshSoon -- item data for the vendor value has been loaded
+-- Item data has been loaded: needed for the vendor value, and rules may have been waiting for it
+function events.GET_ITEM_INFO_RECEIVED()
+    if Cubby.ItemDataArrived() then
+        state.softLayout = true
+    end
+    ScheduleRefresh()
+end
 
 -- The game finished (or updated) its own item search: pick up which slots it found.
 function events.INVENTORY_SEARCH_UPDATE()

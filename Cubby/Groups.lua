@@ -6,6 +6,10 @@
 --   itemTags[itemID] = group ID, or false for "deliberately no group" (also beats rules)
 --   rules[category]  = { tagID, name }: all items of this category belong to the group automatically.
 --                      category is a number (item class) or "q0".."q5" (quality).
+--   tags[id].rule    = { match = "all" | "any", conds = { ... } }: conditions, see Conditions.lua.
+--                      Items matching them belong to the group. If several groups match, the first
+--                      in the order of the sections wins (groups without a section come last).
+-- Who wins for an item: manual assignment, then condition rules, then category rules, then quality rules.
 local _, Cubby = ...
 local state = Cubby.state
 local L = Cubby.L
@@ -17,8 +21,19 @@ local NEW_TAG_COLORS = {
     { 0.25, 0.65, 1 }, { 0.3, 0.85, 0.4 }, { 1, 0.8, 0.2 }, { 0.8, 0.45, 1 }, { 1, 0.55, 0.2 },
 }
 
+-- Results of the condition rules per item: tag, or false for "no rule matches". Rules and item data
+-- rarely change, so the answer is remembered until they do. Items whose game data is still loading
+-- are not remembered; they are arranged again when the data arrives (GET_ITEM_INFO_RECEIVED).
+local conditionCache, conditionTags = {}, nil
+local itemDataPending = false
+
+local function ClearRuleCache()
+    conditionCache, conditionTags = {}, nil
+end
+
 -- After every change to groups: re-arrange and check Blizzard's junk button.
 local function TagsChanged()
+    ClearRuleCache()
     Cubby.RequestLayout()
     Cubby.UpdateBlizzardJunkButton()
 end
@@ -49,8 +64,72 @@ local function QualityKey(quality)
     return "q" .. quality
 end
 
--- A category rule is more specific than a quality rule and therefore wins.
+-- Groups that have condition rules, in priority order: sections as arranged, then the others
+local function ConditionTags()
+    if not conditionTags then
+        conditionTags = {}
+        local rest = {}
+        for _, tag in pairs(Cubby.db.tags) do
+            if tag.rule and tag.rule.conds and #tag.rule.conds > 0 then
+                if tag.section then
+                    conditionTags[#conditionTags + 1] = tag
+                else
+                    rest[#rest + 1] = tag
+                end
+            end
+        end
+        table.sort(conditionTags, function(a, b)
+            return (a.order or 0) < (b.order or 0)
+        end)
+        table.sort(rest, function(a, b)
+            return a.id < b.id
+        end)
+        for _, tag in ipairs(rest) do
+            conditionTags[#conditionTags + 1] = tag
+        end
+    end
+    return conditionTags
+end
+
+local function ConditionTagForItem(itemID)
+    local cached = conditionCache[itemID]
+    if cached ~= nil then
+        return cached or nil
+    end
+    local found, complete = nil, true
+    for _, tag in ipairs(ConditionTags()) do
+        local result = Cubby.MatchesRule(tag.rule, itemID)
+        if result then
+            found = tag
+            break
+        elseif result == nil then
+            complete = false
+        end
+    end
+    if found or complete then
+        conditionCache[itemID] = found or false
+    else
+        itemDataPending = true
+    end
+    return found
+end
+
+-- Item data arrived: rules that had to wait may decide differently now. Returns whether any did.
+local function ItemDataArrived()
+    if not itemDataPending then
+        return false
+    end
+    itemDataPending = false
+    ClearRuleCache()
+    return true
+end
+
+-- Condition rules come first, then a category rule; a quality rule is the most general.
 local function RuleTagForItem(itemID)
+    local conditionTag = ConditionTagForItem(itemID)
+    if conditionTag then
+        return conditionTag
+    end
     local category = ItemCategory(itemID)
     local tag = category and RuleTag(category)
     if tag then
@@ -254,6 +333,57 @@ local function ToggleRule(tag, category, label)
     TagsChanged()
 end
 
+---------------------------------------------------------------------------
+-- Condition rules of a group
+---------------------------------------------------------------------------
+local function RuleOf(tag)
+    tag.rule = tag.rule or { match = "all", conds = {} }
+    tag.rule.conds = tag.rule.conds or {}
+    return tag.rule
+end
+
+local function AddCondition(tag, cond)
+    local conds = RuleOf(tag).conds
+    conds[#conds + 1] = cond
+    TagsChanged()
+end
+
+local function RemoveCondition(tag, index)
+    table.remove(RuleOf(tag).conds, index)
+    TagsChanged()
+end
+
+local function ToggleConditionNegated(tag, index)
+    local cond = RuleOf(tag).conds[index]
+    if cond then
+        cond.neg = not cond.neg or nil
+        TagsChanged()
+    end
+end
+
+local function SetRuleMatch(tag, match)
+    RuleOf(tag).match = match == "any" and "any" or "all"
+    TagsChanged()
+end
+
+-- How many item slots in the bags the group's own conditions match (ignoring other groups)
+local function RuleMatchCount(tag)
+    local rule = tag.rule
+    local count = 0
+    if not rule or not rule.conds or #rule.conds == 0 then
+        return 0
+    end
+    for _, bag in ipairs(Cubby.TaggableBags()) do
+        for slot = 1, Cubby.NumSlots(bag) do
+            local itemID = C_Container.GetContainerItemID(bag, slot)
+            if itemID and Cubby.MatchesRule(rule, itemID) then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
 -- Move a section by delta places in the order (-1 = up)
 local function MoveArea(tag, delta)
     local list = AreaTagsInOrder()
@@ -290,4 +420,12 @@ Cubby.ToggleSellProtection = ToggleSellProtection
 Cubby.ToggleSection = ToggleSection
 Cubby.ToggleCollapsed = ToggleCollapsed
 Cubby.ToggleRule = ToggleRule
+Cubby.ClearRuleCache = ClearRuleCache
+Cubby.ItemDataArrived = ItemDataArrived
+Cubby.RuleOf = RuleOf
+Cubby.AddCondition = AddCondition
+Cubby.RemoveCondition = RemoveCondition
+Cubby.ToggleConditionNegated = ToggleConditionNegated
+Cubby.SetRuleMatch = SetRuleMatch
+Cubby.RuleMatchCount = RuleMatchCount
 Cubby.MoveArea = MoveArea
