@@ -182,6 +182,63 @@ local function MatchesRule(rule, itemID)
 end
 
 ---------------------------------------------------------------------------
+-- Conditions from outside
+---------------------------------------------------------------------------
+local VALID_OPS = { [">="] = true, ["<="] = true, ["="] = true }
+local VALID_SLOTS = {}
+for _, slot in ipairs(EQUIP_SLOTS) do
+    VALID_SLOTS[slot] = true
+end
+local NUMBER_LIMITS = { quality = 5, ilvl = 100000, minlevel = 1000, price = 2000000000 }
+
+local function IsWhole(value, high)
+    return type(value) == "number" and value == math.floor(value) and value >= 0 and value <= high
+end
+
+-- A clean copy of a condition read from an import, or nil if it is not a valid one. Only known
+-- types and values are accepted; text is cleaned and shortened.
+local function SanitizeCondition(raw)
+    if type(raw) ~= "table" then
+        return nil
+    end
+    local kind, value = raw.type, raw.value
+    local cond = { type = kind }
+    if NUMBER_LIMITS[kind] then
+        if not VALID_OPS[raw.op] or not IsWhole(value, NUMBER_LIMITS[kind]) then
+            return nil
+        end
+        cond.op, cond.value = raw.op, value
+    elseif kind == "slot" then
+        if not VALID_SLOTS[value] then
+            return nil
+        end
+        cond.value = value
+    elseif kind == "class" or kind == "category" then
+        if not IsWhole(value, kind == "class" and 99 or 99999) then
+            return nil
+        end
+        cond.value = value
+        local label = Cubby.CleanText(raw.label, 60)
+        cond.label = label ~= "" and label or nil
+    elseif kind == "bind" then
+        if BIND_TYPES[value] == nil then
+            return nil
+        end
+        cond.value = value
+    elseif kind == "name" then
+        local text = Cubby.CleanText(value, 60)
+        if text == "" then
+            return nil
+        end
+        cond.value = text
+    else
+        return nil
+    end
+    cond.neg = raw.neg == true or nil
+    return cond
+end
+
+---------------------------------------------------------------------------
 -- Suggestions for an item
 ---------------------------------------------------------------------------
 local BIND_BY_TYPE = {}
@@ -286,6 +343,7 @@ Cubby.QUALITIES = QUALITIES
 Cubby.EQUIP_SLOTS = EQUIP_SLOTS
 Cubby.MatchesCondition = MatchesCondition
 Cubby.ConditionsForItem = ConditionsForItem
+Cubby.SanitizeCondition = SanitizeCondition
 Cubby.BIND_KINDS = BIND_KINDS
 Cubby.MatchesRule = MatchesRule
 Cubby.DescribeCondition = Describe

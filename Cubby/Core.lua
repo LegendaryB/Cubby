@@ -49,6 +49,24 @@ function Cubby.Print(msg)
     print(msg)
 end
 
+-- Text from outside (an import) made safe for names and labels: no control characters or "|" escapes,
+-- trimmed, at most limit characters, and only whole UTF-8 characters.
+function Cubby.CleanText(text, limit)
+    if type(text) ~= "string" then
+        return ""
+    end
+    text = text:gsub("[%c|]", ""):match("^%s*(.-)%s*$")
+    local out, count = {}, 0
+    for char in text:gmatch("[\1-\127\194-\244][\128-\191]*") do
+        count = count + 1
+        if count > limit then
+            break
+        end
+        out[count] = char
+    end
+    return table.concat(out)
+end
+
 function Cubby.ErrorHandler(err)
     return tostring(err) .. "\n" .. (debugstack and debugstack(2, 12, 0) or "")
 end

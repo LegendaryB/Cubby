@@ -14,6 +14,7 @@ UI\Widgets.lua
 Conditions.lua
 Groups.lua
 ItemOrder.lua
+Transfer.lua
 SellProtection.lua
 
 # Windows
@@ -26,6 +27,7 @@ UI\GroupHeaders.lua
 UI\Layout.lua
 UI\Options.lua
 UI\RuleEditor.lua
+UI\TransferWindow.lua
 
 # Blizzard integration
 Sorting.lua
